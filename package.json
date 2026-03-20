@@ -42,7 +42,7 @@
   },
   "build": {
     "appId": "com.p2p.communication",
-    "productName": "P2P跨平台文件传输",
+    "productName": "P2P File Transfer",
     "directories": {
       "output": "release"
     },
@@ -54,7 +54,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "P2P跨平台文件传输"
+      "shortcutName": "P2P File Transfer"
     }
   }
 }
