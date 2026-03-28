@@ -1,6 +1,7 @@
 {
   "name": "p2p-chat",
   "version": "1.0.0",
+  "description": "P2P实时通信桌面应用",
   "main": "main.js",
   "scripts": {
     "dist": "electron-builder"
@@ -14,6 +15,11 @@
     "productName": "P2P实时通信",
     "win": {
       "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
     }
   }
 }
