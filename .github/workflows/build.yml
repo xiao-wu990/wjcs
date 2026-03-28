@@ -1,4 +1,4 @@
-﻿name: Build and Release
+﻿name: Build Windows Installer
 
 on:
   push:
@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install
       
-      - name: Build
+      - name: Build installer
         run: npm run dist
       
       - name: Upload to Release
