@@ -18,6 +18,6 @@ jobs:
       
       - name: Install dependencies
         run: npm install
-        
-      - name: Build installer
-        run: npx electron-builder --win --publish never
+      
+      - name: Build installer (no icon)
+        run: npx electron-builder --win nsis --config.win.icon=undefined
