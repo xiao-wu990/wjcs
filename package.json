@@ -1,7 +1,6 @@
 {
   "name": "p2p-chat",
   "version": "1.0.0",
-  "description": "P2P实时通信",
   "main": "main.js",
   "scripts": {
     "dist": "electron-builder"
@@ -9,15 +8,5 @@
   "devDependencies": {
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1"
-  },
-  "build": {
-    "appId": "com.p2p.chat",
-    "productName": "P2P实时通信",
-    "directories": {
-      "output": "dist"
-    },
-    "win": {
-      "target": "nsis"
-    }
   }
 }
