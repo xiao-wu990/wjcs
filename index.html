@@ -694,7 +694,10 @@
         <div class="info-item">
           <label>你的 ID:</label>
           <input type="text" class="value" id="local-id" readonly>
-          <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('local-id')">复制</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary copy-btn" onclick="copyToClipboard('local-id')">复制</button>
+            <button class="btn btn-secondary copy-btn" onclick="showQRCode()">📱 二维码</button>
+          </div>
         </div>
         <div class="input-group" style="margin-top: 20px;">
           <label>对方 ID:</label>
@@ -740,6 +743,7 @@
 
   <!-- 引入 PeerJS -->
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <script>
     // 检测浏览器兼容性
     function checkBrowserSupport() {
@@ -1144,6 +1148,97 @@
       const files = Array.from(e.dataTransfer.files);
       files.forEach(file => sendFile(file));
     });
+
+    // 显示二维码
+    function showQRCode() {
+      const localId = document.getElementById('local-id').value;
+      if (!localId) {
+        showStatus('❌ 请先初始化连接', 'error');
+        return;
+      }
+      
+      // 构建连接URL，包含本地ID
+      const connectionUrl = `${window.location.origin}${window.location.pathname}?connect=${localId}`;
+      
+      // 创建新弹窗
+      const qrWindow = window.open('', 'QRCodeModal', 'width=400,height=500,top=100,left=100');
+      
+      if (qrWindow) {
+        // 写入弹窗内容
+        qrWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>扫码连接</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+              }
+              .qrcode-wrapper {
+                background: white;
+                padding: 20px;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                animation: qrPulse 3s ease-in-out infinite;
+              }
+              .qrcode-label {
+                margin-top: 20px;
+                font-size: 16px;
+                text-align: center;
+              }
+              @keyframes qrPulse {
+                0% {
+                  transform: scale(1);
+                  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+                }
+                50% {
+                  transform: scale(1.05);
+                  box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
+                }
+                100% {
+                  transform: scale(1);
+                  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+                }
+              }
+            </style>
+          </head>
+          <body>
+            <h2>请使用微信扫码</h2>
+            <div class="qrcode-wrapper">
+              <canvas id="qrcode" width="200" height="200"></canvas>
+            </div>
+            <div class="qrcode-label">扫码后即可连接</div>
+            <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+            <script>
+              const qrCodeCanvas = document.getElementById('qrcode');
+              QRCode.toCanvas(qrCodeCanvas, '${connectionUrl}', {
+                width: 200,
+                margin: 1,
+                color: {
+                  dark: '#000000',
+                  light: '#ffffff'
+                }
+              }, function (error) {
+                if (error) {
+                  console.error('二维码生成失败:', error);
+                }
+              });
+            </script>
+          </body>
+          </html>
+        `);
+        
+        qrWindow.document.close();
+      }
+    }
 
     // 初始禁用文件上传区域
     document.getElementById('file-area').classList.add('disabled');
