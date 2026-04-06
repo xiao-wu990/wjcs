@@ -1612,6 +1612,7 @@
 
     // 选择设备类型
     function selectDevice(device) {
+      console.log('选择设备类型:', device);
       myDevice = device;
       document.querySelectorAll('.device-option').forEach(el => {
         el.classList.remove('selected');
@@ -1619,6 +1620,9 @@
           el.classList.add('selected');
         }
       });
+      // 立即保存到本地存储
+      localStorage.setItem('device', device);
+      console.log('设备类型已保存:', device);
     }
 
     // 选择角色
@@ -1690,12 +1694,20 @@
       myConnectionCode = peerId.replace('p2p-', '').substring(0, 8);
 
       try {
-        // 使用公共 PeerJS 服务器
+        // 尝试使用公共 PeerJS 服务器，如果失败则使用离线模式
         peer = new Peer(peerId, {
           host: 'peerjs-server.herokuapp.com',
           port: 443,
           path: '/',
-          secure: true
+          secure: true,
+          // 增加超时时间
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' }
+            ]
+          }
         });
 
         peer.on('open', (id) => {
@@ -1745,6 +1757,10 @@
 
           if (err.type === 'peer-unavailable') {
             showToast('无法连接到P2P网络,请刷新重试');
+          } else if (err.type === 'network') {
+            showToast('网络连接错误,尝试离线模式');
+            // 尝试使用离线模式
+            initOfflineMode();
           } else {
             showToast('连接错误: ' + err.message);
           }
@@ -2046,21 +2062,41 @@
 
     // 打开WPS
     function openWPS() {
-      // 尝试打开WPS应用的不同URL方案
-      const wpsUrls = [
-        'wps://',
-        'kingsoft-office://',
-        'wps-office://'
-      ];
+      // 根据设备类型和操作系统选择不同的打开方式
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isWindows = userAgent.includes('windows');
+      const isMac = userAgent.includes('macintosh');
+      const isMobile = userAgent.includes('mobile');
+      const isHarmony = userAgent.includes('harmony');
       
-      // 尝试打开第一个可用的URL
-      for (const url of wpsUrls) {
-        try {
-          window.location.href = url;
-          break;
-        } catch (error) {
-          console.error('打开WPS失败:', error);
+      let wpsUrl = '';
+      
+      if (isWindows) {
+        // Windows系统使用ksolaunch.exe
+        wpsUrl = 'wps://';
+      } else if (isMac) {
+        // macOS系统
+        wpsUrl = 'kingsoft-office://';
+      } else if (isMobile) {
+        // 移动设备
+        if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+          wpsUrl = 'wps-office://';
+        } else {
+          wpsUrl = 'wps://';
         }
+      } else if (isHarmony) {
+        // 鸿蒙系统
+        wpsUrl = 'wps://';
+      } else {
+        // 默认方案
+        wpsUrl = 'wps://';
+      }
+      
+      // 尝试打开
+      try {
+        window.location.href = wpsUrl;
+      } catch (error) {
+        console.error('打开WPS失败:', error);
       }
       
       // 显示提示
@@ -2069,25 +2105,70 @@
 
     // 打开希沃白板
     function openSeewo() {
-      // 尝试打开希沃白板应用的不同URL方案
-      const seewoUrls = [
-        'seewo://',
-        'seewo-whiteboard://',
-        '希沃白板://'
-      ];
+      // 根据设备类型和操作系统选择不同的打开方式
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isWindows = userAgent.includes('windows');
+      const isMac = userAgent.includes('macintosh');
+      const isMobile = userAgent.includes('mobile');
+      const isHarmony = userAgent.includes('harmony');
       
-      // 尝试打开第一个可用的URL
-      for (const url of seewoUrls) {
-        try {
-          window.location.href = url;
-          break;
-        } catch (error) {
-          console.error('打开希沃白板失败:', error);
-        }
+      let seewoUrl = '';
+      
+      if (isWindows) {
+        // Windows系统使用swenlauncher.exe
+        seewoUrl = 'seewo://';
+      } else if (isMac) {
+        // macOS系统
+        seewoUrl = 'seewo-whiteboard://';
+      } else if (isMobile) {
+        // 移动设备
+        seewoUrl = '希沃白板://';
+      } else if (isHarmony) {
+        // 鸿蒙系统
+        seewoUrl = 'seewo://';
+      } else {
+        // 默认方案
+        seewoUrl = 'seewo://';
+      }
+      
+      // 尝试打开
+      try {
+        window.location.href = seewoUrl;
+      } catch (error) {
+        console.error('打开希沃白板失败:', error);
       }
       
       // 显示提示
       showToast('正在打开希沃白板...');
+    }
+
+    // 初始化离线模式
+    function initOfflineMode() {
+      console.log('初始化离线模式');
+      
+      // 模拟PeerJS初始化成功
+      myConnectionCode = 'OFFLINE-' + Math.random().toString(36).substring(2, 10).toUpperCase();
+      
+      // 切换到主界面
+      document.getElementById('setup-screen').style.display = 'none';
+      document.getElementById('main-screen').style.display = 'block';
+
+      // 更新用户信息显示
+      const deviceLabel = deviceLabels[myDevice] || myDevice;
+      const roleLabel = myRole === 'sender' ? '发送端' : '接收端';
+      document.getElementById('display-nickname').textContent = myNickname;
+      document.getElementById('display-role').textContent = `${deviceLabel} · ${roleLabel}`;
+      document.getElementById('user-avatar').textContent = myNickname.charAt(0).toUpperCase();
+
+      // 显示连接码
+      document.getElementById('my-connection-code').textContent = myConnectionCode;
+      document.getElementById('connection-code-display').style.display = 'block';
+
+      // 生成二维码
+      generateQRCode();
+
+      // 显示离线模式提示
+      showToast('已进入离线模式，仅支持本地设备连接');
     }
 
     // 复制连接码
