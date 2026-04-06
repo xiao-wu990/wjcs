@@ -2069,34 +2069,33 @@
       const isMobile = userAgent.includes('mobile');
       const isHarmony = userAgent.includes('harmony');
       
-      let wpsUrl = '';
+      // 尝试多种WPS打开方式
+      const wpsUrls = [
+        'wps://',
+        'kingsoft-office://',
+        'wps-office://',
+        'ksolaunch://'
+      ];
       
-      if (isWindows) {
-        // Windows系统使用ksolaunch.exe
-        wpsUrl = 'wps://';
-      } else if (isMac) {
-        // macOS系统
-        wpsUrl = 'kingsoft-office://';
-      } else if (isMobile) {
-        // 移动设备
-        if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
-          wpsUrl = 'wps-office://';
-        } else {
-          wpsUrl = 'wps://';
+      // 尝试打开第一个可用的URL
+      let opened = false;
+      for (const url of wpsUrls) {
+        try {
+          window.location.href = url;
+          opened = true;
+          break;
+        } catch (error) {
+          console.error('尝试打开WPS失败:', error);
         }
-      } else if (isHarmony) {
-        // 鸿蒙系统
-        wpsUrl = 'wps://';
-      } else {
-        // 默认方案
-        wpsUrl = 'wps://';
       }
       
-      // 尝试打开
-      try {
-        window.location.href = wpsUrl;
-      } catch (error) {
-        console.error('打开WPS失败:', error);
+      if (!opened) {
+        // 如果所有URL都失败，尝试直接打开WPS官网
+        try {
+          window.open('https://www.wps.cn/', '_blank');
+        } catch (error) {
+          console.error('打开WPS官网失败:', error);
+        }
       }
       
       // 显示提示
@@ -2112,30 +2111,33 @@
       const isMobile = userAgent.includes('mobile');
       const isHarmony = userAgent.includes('harmony');
       
-      let seewoUrl = '';
+      // 尝试多种希沃白板打开方式
+      const seewoUrls = [
+        'seewo://',
+        'seewo-whiteboard://',
+        '希沃白板://',
+        'swenlauncher://'
+      ];
       
-      if (isWindows) {
-        // Windows系统使用swenlauncher.exe
-        seewoUrl = 'seewo://';
-      } else if (isMac) {
-        // macOS系统
-        seewoUrl = 'seewo-whiteboard://';
-      } else if (isMobile) {
-        // 移动设备
-        seewoUrl = '希沃白板://';
-      } else if (isHarmony) {
-        // 鸿蒙系统
-        seewoUrl = 'seewo://';
-      } else {
-        // 默认方案
-        seewoUrl = 'seewo://';
+      // 尝试打开第一个可用的URL
+      let opened = false;
+      for (const url of seewoUrls) {
+        try {
+          window.location.href = url;
+          opened = true;
+          break;
+        } catch (error) {
+          console.error('尝试打开希沃白板失败:', error);
+        }
       }
       
-      // 尝试打开
-      try {
-        window.location.href = seewoUrl;
-      } catch (error) {
-        console.error('打开希沃白板失败:', error);
+      if (!opened) {
+        // 如果所有URL都失败，尝试直接打开希沃白板官网
+        try {
+          window.open('https://www.seewo.com/', '_blank');
+        } catch (error) {
+          console.error('打开希沃白板官网失败:', error);
+        }
       }
       
       // 显示提示
@@ -2168,7 +2170,7 @@
       generateQRCode();
 
       // 显示离线模式提示
-      showToast('已进入离线模式，仅支持本地设备连接');
+      showToast('已进入离线模式，仅支持同一局域网内的设备连接');
     }
 
     // 复制连接码
