@@ -1701,12 +1701,8 @@
       myConnectionCode = peerId.replace('p2p-', '').substring(0, 8);
 
       try {
-        // 使用可靠的 PeerJS 服务器
+        // 使用默认的 PeerJS 服务器
         peer = new Peer(peerId, {
-          host: 'peerjs-server.azurewebsites.net',
-          port: 443,
-          path: '/',
-          secure: true,
           // 增加超时时间
           config: {
             iceServers: [
