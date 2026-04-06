@@ -1265,6 +1265,16 @@
       }
     }
 
+    /* 扫码动画效果 */
+    @keyframes scan {
+      0% {
+        transform: translateY(-100%);
+      }
+      100% {
+        transform: translateY(100%);
+      }
+    }
+
     .qrcode-wrapper {
       animation: qrPulse 3s ease-in-out infinite;
     }
@@ -1462,6 +1472,11 @@
             <div class="code" id="my-connection-code" onclick="copyConnectionCode()" title="点击复制"></div>
           </div>
 
+          <!-- 二维码连接模式 -->
+          <div class="qrcode-mode" style="margin-top: 16px;">
+            <button class="action-btn" onclick="showQRCodeMode()">📱 二维码连接</button>
+          </div>
+
           <!-- 二维码连接 -->
           <div class="qrcode-container" id="qrcode-container" style="display: none;">
             <div class="qrcode-wrapper">
@@ -1470,6 +1485,21 @@
               </div>
             </div>
             <div class="qrcode-label">扫码连接</div>
+          </div>
+
+          <!-- 扫码界面 -->
+          <div class="scan-container" id="scan-container" style="display: none;">
+            <div style="text-align: center; padding: 20px;">
+              <h4 style="margin-bottom: 16px;">扫码连接</h4>
+              <div id="scan-area" style="width: 200px; height: 200px; border: 2px solid var(--accent-primary); margin: 0 auto; position: relative;">
+                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center;">
+                  <span style="font-size: 48px;">📷</span>
+                </div>
+                <div style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: var(--accent-primary); animation: scan 2s linear infinite;"></div>
+              </div>
+              <p style="margin-top: 16px; font-size: 14px; color: var(--text-secondary);">请扫描其他设备的二维码</p>
+              <button class="action-btn secondary" style="margin-top: 16px;" onclick="hideScanMode()">取消</button>
+            </div>
           </div>
 
           <!-- 桌面版下载 -->
@@ -2930,6 +2960,95 @@
         updateThemeIcon(savedTheme);
       }
     });
+
+    // 生成二维码
+    function generateQRCode() {
+      const qrCodeContainer = document.getElementById('qrcode-container');
+      const qrCodeCanvas = document.getElementById('qrcode');
+      
+      if (peer && peer.id) {
+        // 构建连接URL，包含peer ID
+        const connectionUrl = `${window.location.origin}${window.location.pathname}?connect=${peer.id}`;
+        
+        // 生成二维码
+        QRCode.toCanvas(qrCodeCanvas, connectionUrl, {
+          width: 160,
+          margin: 1,
+          color: {
+            dark: '#000000',
+            light: '#ffffff'
+          }
+        }, function (error) {
+          if (error) {
+            console.error('二维码生成失败:', error);
+          } else {
+            // 显示二维码
+            qrCodeContainer.style.display = 'block';
+          }
+        });
+      }
+    }
+
+    // 显示二维码连接模式选择
+    function showQRCodeMode() {
+      // 隐藏其他容器
+      document.getElementById('qrcode-container').style.display = 'none';
+      document.getElementById('scan-container').style.display = 'none';
+      
+      // 显示二维码连接模式选择
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay active';
+      modal.innerHTML = `
+        <div class="modal-content">
+          <h3>二维码连接</h3>
+          <p>选择连接方式</p>
+          <div style="display: flex; gap: 16px; margin: 24px 0;">
+            <button class="modal-btn primary" style="flex: 1;" onclick="showQRCode()">被扫码</button>
+            <button class="modal-btn" style="flex: 1;" onclick="showScanMode()">扫码</button>
+          </div>
+          <button class="modal-btn" onclick="this.parentElement.parentElement.remove()">取消</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // 显示二维码（被扫码模式）
+    function showQRCode() {
+      // 关闭模态框
+      document.querySelector('.modal-overlay.active').remove();
+      
+      // 生成并显示二维码
+      generateQRCode();
+      
+      // 隐藏扫码容器
+      document.getElementById('scan-container').style.display = 'none';
+    }
+
+    // 显示扫码界面（扫码模式）
+    function showScanMode() {
+      // 关闭模态框
+      document.querySelector('.modal-overlay.active').remove();
+      
+      // 隐藏二维码容器
+      document.getElementById('qrcode-container').style.display = 'none';
+      
+      // 显示扫码容器
+      document.getElementById('scan-container').style.display = 'block';
+      
+      // 尝试访问摄像头进行扫码
+      try {
+        // 这里可以集成扫码库，如qr-scanner.js
+        showToast('请扫描其他设备的二维码');
+      } catch (error) {
+        console.error('扫码初始化失败:', error);
+        showToast('扫码功能需要摄像头权限');
+      }
+    }
+
+    // 隐藏扫码界面
+    function hideScanMode() {
+      document.getElementById('scan-container').style.display = 'none';
+    }
 
     // 页面关闭
     window.addEventListener('beforeunload', () => {
