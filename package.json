@@ -1,6 +1,8 @@
 { 
   "name": "wjcs",
   "version": "1.0.0",
+  "description": "文件传输工具 - 支持跨设备文件传输和实时通讯",
+  "author": "xiao-wu990",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
