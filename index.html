@@ -1269,36 +1269,31 @@
       animation: qrPulse 3s ease-in-out infinite;
     }
 
-    /* 应用联动按钮 */
-    .app-integration {
+    /* 桌面版下载按钮 */
+    .desktop-download {
       margin-top: 20px;
-      display: flex;
-      gap: 12px;
-      justify-content: center;
+      text-align: center;
     }
 
-    .app-btn {
-      flex: 1;
-      padding: 12px 16px;
-      border: 2px solid var(--border-color);
-      border-radius: 10px;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+    .desktop-btn {
+      padding: 14px 24px;
+      border: 2px solid var(--accent-primary);
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
       cursor: pointer;
       transition: var(--transition);
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 8px;
       font-size: 14px;
       font-weight: 600;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
-    .app-btn:hover {
-      border-color: var(--accent-primary);
-      background: var(--accent-primary);
-      color: white;
-      transform: translateY(-2px);
+    .desktop-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
     }
 
     /* 页脚 */
@@ -1477,11 +1472,12 @@
             <div class="qrcode-label">扫码连接</div>
           </div>
 
-          <!-- 应用联动 -->
-          <div class="app-integration">
-            <button class="app-btn" onclick="openWPS()">📄 WPS</button>
-            <button class="app-btn" onclick="openSeewo()">📱 希沃白板</button>
+          <!-- 桌面版下载 -->
+          <div class="desktop-download">
+            <button class="desktop-btn" onclick="downloadDesktopApp()">💻 下载桌面版</button>
+            <p style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">支持Windows系统，与网页版实时联动</p>
           </div>
+
         </div>
 
         <div class="device-list" id="device-list">
@@ -1705,9 +1701,9 @@
       myConnectionCode = peerId.replace('p2p-', '').substring(0, 8);
 
       try {
-        // 尝试使用公共 PeerJS 服务器，如果失败则使用离线模式
+        // 使用可靠的 PeerJS 服务器
         peer = new Peer(peerId, {
-          host: 'peerjs-server.herokuapp.com',
+          host: 'peerjs-server.azurewebsites.net',
           port: 443,
           path: '/',
           secure: true,
@@ -2082,89 +2078,7 @@
       }
     }
 
-    // 打开WPS
-    function openWPS() {
-      // 根据设备类型和操作系统选择不同的打开方式
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isWindows = userAgent.includes('windows');
-      const isMac = userAgent.includes('macintosh');
-      const isMobile = userAgent.includes('mobile');
-      const isHarmony = userAgent.includes('harmony');
-      
-      // 尝试多种WPS打开方式
-      const wpsUrls = [
-        'wps://',
-        'kingsoft-office://',
-        'wps-office://',
-        'ksolaunch://'
-      ];
-      
-      // 尝试打开第一个可用的URL
-      let opened = false;
-      for (const url of wpsUrls) {
-        try {
-          window.location.href = url;
-          opened = true;
-          break;
-        } catch (error) {
-          console.error('尝试打开WPS失败:', error);
-        }
-      }
-      
-      if (!opened) {
-        // 如果所有URL都失败，尝试直接打开WPS官网
-        try {
-          window.open('https://www.wps.cn/', '_blank');
-        } catch (error) {
-          console.error('打开WPS官网失败:', error);
-        }
-      }
-      
-      // 显示提示
-      showToast('正在打开WPS...');
-    }
 
-    // 打开希沃白板
-    function openSeewo() {
-      // 根据设备类型和操作系统选择不同的打开方式
-      const userAgent = navigator.userAgent.toLowerCase();
-      const isWindows = userAgent.includes('windows');
-      const isMac = userAgent.includes('macintosh');
-      const isMobile = userAgent.includes('mobile');
-      const isHarmony = userAgent.includes('harmony');
-      
-      // 尝试多种希沃白板打开方式
-      const seewoUrls = [
-        'seewo://',
-        'seewo-whiteboard://',
-        '希沃白板://',
-        'swenlauncher://'
-      ];
-      
-      // 尝试打开第一个可用的URL
-      let opened = false;
-      for (const url of seewoUrls) {
-        try {
-          window.location.href = url;
-          opened = true;
-          break;
-        } catch (error) {
-          console.error('尝试打开希沃白板失败:', error);
-        }
-      }
-      
-      if (!opened) {
-        // 如果所有URL都失败，尝试直接打开希沃白板官网
-        try {
-          window.open('https://www.seewo.com/', '_blank');
-        } catch (error) {
-          console.error('打开希沃白板官网失败:', error);
-        }
-      }
-      
-      // 显示提示
-      showToast('正在打开希沃白板...');
-    }
 
 
 
@@ -2175,6 +2089,42 @@
       }).catch(() => {
         showToast('复制失败');
       });
+    }
+
+    // 下载桌面版
+    function downloadDesktopApp() {
+      // 模拟下载链接，实际项目中应替换为真实的下载地址
+      const downloadUrl = 'https://github.com/xiao-wu990/wjcs/releases/latest/download/wjcs-setup.exe';
+      
+      // 打开下载链接
+      window.open(downloadUrl, '_blank');
+      
+      // 显示提示
+      showToast('正在下载桌面版...');
+    }
+
+    // 检查桌面版更新
+    function checkDesktopUpdate() {
+      // 模拟版本检查，实际项目中应从服务器获取最新版本信息
+      const currentVersion = '1.0.0';
+      const latestVersion = '1.0.1';
+      
+      if (latestVersion > currentVersion) {
+        showToast('发现新版本，点击更新按钮安装');
+        // 实际项目中应显示更新提示框
+      }
+    }
+
+    // 安装桌面版更新
+    function installDesktopUpdate() {
+      // 模拟更新安装，实际项目中应替换为真实的更新地址
+      const updateUrl = 'https://github.com/xiao-wu990/wjcs/releases/latest/download/wjcs-setup.exe';
+      
+      // 打开更新链接
+      window.open(updateUrl, '_blank');
+      
+      // 显示提示
+      showToast('正在安装更新...');
     }
 
     // 显示连接码输入弹窗
