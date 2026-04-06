@@ -2,6 +2,8 @@ name: Build Windows Installer
 
 on:
   push:
+    branches:
+      - main
     tags:
       - 'v*'
 
@@ -19,5 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm install
       
-      - name: Build installer (no icon)
-        run: npx electron-builder --win nsis --config.win.icon=undefined
+      - name: Build installer
+        run: npx electron-builder --win nsis
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: dist/*.exe
