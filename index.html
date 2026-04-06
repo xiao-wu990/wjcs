@@ -1690,7 +1690,13 @@
       myConnectionCode = peerId.replace('p2p-', '').substring(0, 8);
 
       try {
-        peer = new Peer(peerId);
+        // 使用公共 PeerJS 服务器
+        peer = new Peer(peerId, {
+          host: 'peerjs-server.herokuapp.com',
+          port: 443,
+          path: '/',
+          secure: true
+        });
 
         peer.on('open', (id) => {
           console.log('PeerJS 连接成功, ID:', id);
@@ -2178,7 +2184,7 @@
         const hasUnread = unreadMessages[peerId] > 0 && currentChatPeerId !== peerId;
         return `
           <div class="device-item ${currentChatPeerId === peerId ? 'active' : ''} ${hasUnread ? 'has-unread' : ''}"
-               onclick="selectDevice('${peerId}')">
+               onclick="selectChatDevice('${peerId}')">
             <div class="device-name">
               <span>${device.nickname}</span>
               <span class="alias">${device.alias ? `(${device.alias})` : ''}</span>
@@ -2196,8 +2202,8 @@
       }).join('');
     }
 
-    // 选择设备
-    function selectDevice(peerId) {
+    // 选择聊天设备
+    function selectChatDevice(peerId) {
       currentChatPeerId = peerId;
       
       // 清除未读标记
