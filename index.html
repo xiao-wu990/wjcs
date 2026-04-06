@@ -172,7 +172,7 @@
 
     .device-selector {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
       margin-bottom: 24px;
     }
@@ -1038,6 +1038,17 @@
       }
     }
 
+    /* 设备方向适配 */
+    .device-phone {
+      /* 手机竖屏布局 */
+    }
+
+    .device-tablet,
+    .device-pc,
+    .device-tv {
+      /* 横屏布局 */
+    }
+
     /* 响应式设计 */
     @media (max-width: 768px) {
       .sidebar {
@@ -1093,7 +1104,44 @@
       }
 
       .device-selector {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* 手机竖屏专用样式 */
+    @media (max-width: 768px) and (orientation: portrait) {
+      .device-phone .main-container {
+        flex-direction: column;
+      }
+
+      .device-phone .sidebar {
+        width: 100%;
+        left: -100%;
+      }
+
+      .device-phone .chat-area {
+        height: calc(100vh - 70px);
+      }
+    }
+
+    /* 横屏设备专用样式 */
+    @media (min-width: 769px) {
+      .device-tablet .main-container,
+      .device-pc .main-container,
+      .device-tv .main-container {
+        flex-direction: row;
+      }
+
+      .device-tablet .sidebar,
+      .device-pc .sidebar,
+      .device-tv .sidebar {
+        width: 320px;
+      }
+
+      .device-tablet .chat-area,
+      .device-pc .chat-area,
+      .device-tv .chat-area {
+        flex: 1;
       }
     }
 
@@ -1147,7 +1195,7 @@
       font-size: 20px;
     }
 
-    /* 二维码样式 */
+    /* 二维码样式 - 鸿蒙风格 */
     .qrcode-container {
       margin: 20px 0;
       text-align: center;
@@ -1156,9 +1204,9 @@
     .qrcode-wrapper {
       position: relative;
       display: inline-block;
-      padding: 20px;
-      background: radial-gradient(circle, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-      border-radius: 50%;
+      padding: 16px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 24px;
       box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
       animation: pulse 2s infinite;
     }
@@ -1168,16 +1216,29 @@
       width: 200px;
       height: 200px;
       background: white;
-      border-radius: 50%;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .qrcode-inner::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      border: 1px solid rgba(102, 126, 234, 0.3);
+      border-radius: 12px;
+      pointer-events: none;
     }
 
     .qrcode-inner canvas {
-      width: 180px !important;
-      height: 180px !important;
+      width: 160px !important;
+      height: 160px !important;
       border-radius: 8px;
     }
 
@@ -1186,6 +1247,26 @@
       font-size: 14px;
       color: var(--text-secondary);
       font-weight: 600;
+    }
+
+    /* 二维码动画效果 */
+    @keyframes qrPulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+      }
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 12px 40px rgba(102, 126, 234, 0.6);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+      }
+    }
+
+    .qrcode-wrapper {
+      animation: qrPulse 3s ease-in-out infinite;
     }
 
     /* 应用联动按钮 */
@@ -1305,6 +1386,10 @@
           <div class="device-option" data-device="pc" onclick="selectDevice('pc')">
             <div class="icon">💻</div>
             <div class="label">电脑</div>
+          </div>
+          <div class="device-option" data-device="tv" onclick="selectDevice('tv')">
+            <div class="icon">📺</div>
+            <div class="label">电视</div>
           </div>
         </div>
       </div>
@@ -1521,7 +1606,8 @@
     const deviceLabels = {
       phone: '手机',
       tablet: '平板',
-      pc: '电脑'
+      pc: '电脑',
+      tv: '电视'
     };
 
     // 选择设备类型
@@ -1574,6 +1660,9 @@
         deviceConnectionCounts = JSON.parse(savedConnectionCounts);
       }
 
+      // 设置设备方向
+      setDeviceOrientation();
+
       // 更新按钮状态
       const startBtn = document.getElementById('start-btn');
       startBtn.textContent = '连接中...';
@@ -1581,6 +1670,17 @@
 
       // 初始化 PeerJS
       initPeerJS();
+    }
+
+    // 设置设备方向
+    function setDeviceOrientation() {
+      const body = document.body;
+      
+      // 移除所有方向类
+      body.classList.remove('device-phone', 'device-tablet', 'device-pc', 'device-tv');
+      
+      // 添加当前设备类型的类
+      body.classList.add(`device-${myDevice}`);
     }
 
     // 初始化 PeerJS
@@ -1940,9 +2040,22 @@
 
     // 打开WPS
     function openWPS() {
-      // 尝试打开WPS应用
-      const wpsUrl = 'wps://';
-      window.location.href = wpsUrl;
+      // 尝试打开WPS应用的不同URL方案
+      const wpsUrls = [
+        'wps://',
+        'kingsoft-office://',
+        'wps-office://'
+      ];
+      
+      // 尝试打开第一个可用的URL
+      for (const url of wpsUrls) {
+        try {
+          window.location.href = url;
+          break;
+        } catch (error) {
+          console.error('打开WPS失败:', error);
+        }
+      }
       
       // 显示提示
       showToast('正在打开WPS...');
@@ -1950,9 +2063,22 @@
 
     // 打开希沃白板
     function openSeewo() {
-      // 尝试打开希沃白板应用
-      const seewoUrl = 'seewo://';
-      window.location.href = seewoUrl;
+      // 尝试打开希沃白板应用的不同URL方案
+      const seewoUrls = [
+        'seewo://',
+        'seewo-whiteboard://',
+        '希沃白板://'
+      ];
+      
+      // 尝试打开第一个可用的URL
+      for (const url of seewoUrls) {
+        try {
+          window.location.href = url;
+          break;
+        } catch (error) {
+          console.error('打开希沃白板失败:', error);
+        }
+      }
       
       // 显示提示
       showToast('正在打开希沃白板...');
