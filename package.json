@@ -2,7 +2,7 @@
   "name": "wjcs",
   "version": "1.0.0",
   "description": "文件传输工具 - 支持跨设备文件传输和实时通讯",
-  "author": "xiao-wu990",
+  "author": "福建省宁德市闲聊部队科技与服务工作室（宁德总工作室）",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -11,12 +11,17 @@
   "build": {
     "appId": "com.wjcs.app",
     "productName": "文件传输工具",
+    "copyright": "© 2024 福建省宁德市闲聊部队科技与服务工作室（宁德总工作室）",
     "win": {
       "target": "nsis"
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "installerHeaderName": "文件传输工具安装向导",
+      "installerFooterName": "福建省宁德市闲聊部队科技与服务工作室（宁德总工作室）",
+      "uninstallerHeaderName": "文件传输工具卸载向导",
+      "uninstallerFooterName": "福建省宁德市闲聊部队科技与服务工作室（宁德总工作室）"
     }
   },
   "devDependencies": {
