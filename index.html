@@ -1768,10 +1768,6 @@
 
           if (err.type === 'peer-unavailable') {
             showToast('无法连接到P2P网络,请刷新重试');
-          } else if (err.type === 'network') {
-            showToast('网络连接错误,尝试离线模式');
-            // 尝试使用离线模式
-            initOfflineMode();
           } else if (err.message.includes('Cannot connect to new Peer after disconnecting from server')) {
             showToast('连接失败,尝试重新初始化');
             // 重新初始化 PeerJS
@@ -2170,34 +2166,7 @@
       showToast('正在打开希沃白板...');
     }
 
-    // 初始化离线模式
-    function initOfflineMode() {
-      console.log('初始化离线模式');
-      
-      // 模拟PeerJS初始化成功
-      myConnectionCode = 'OFFLINE-' + Math.random().toString(36).substring(2, 10).toUpperCase();
-      
-      // 切换到主界面
-      document.getElementById('setup-screen').style.display = 'none';
-      document.getElementById('main-screen').style.display = 'block';
 
-      // 更新用户信息显示
-      const deviceLabel = deviceLabels[myDevice] || myDevice;
-      const roleLabel = myRole === 'sender' ? '发送端' : '接收端';
-      document.getElementById('display-nickname').textContent = myNickname;
-      document.getElementById('display-role').textContent = `${deviceLabel} · ${roleLabel}`;
-      document.getElementById('user-avatar').textContent = myNickname.charAt(0).toUpperCase();
-
-      // 显示连接码
-      document.getElementById('my-connection-code').textContent = myConnectionCode;
-      document.getElementById('connection-code-display').style.display = 'block';
-
-      // 生成二维码
-      generateQRCode();
-
-      // 显示离线模式提示
-      showToast('已进入离线模式，仅支持同一局域网内的设备连接');
-    }
 
     // 复制连接码
     function copyConnectionCode() {
@@ -2225,14 +2194,7 @@
       }
 
       // 构建完整的 Peer ID
-      let peerId = '';
-      if (code.startsWith('OFFLINE-')) {
-        // 离线模式连接码
-        peerId = code;
-      } else {
-        // 在线模式连接码
-        peerId = 'p2p-' + code;
-      }
+      const peerId = 'p2p-' + code;
 
       if (connections[peerId]) {
         showToast('该设备已连接');
