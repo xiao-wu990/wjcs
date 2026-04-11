@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>P2P实时通信</title>
+  <title>P2P实时通信 · 文件传输</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <style>
@@ -506,6 +506,7 @@
       color: var(--text-secondary);
     }
 
+    /* 文件/图片消息样式 */
     .file-message {
       display: flex;
       align-items: center;
@@ -514,28 +515,22 @@
       background: var(--bg-tertiary);
       border-radius: 10px;
       margin-top: 8px;
+      flex-wrap: wrap;
     }
-
-    .file-message .file-icon {
-      font-size: 32px;
-    }
-
-    .file-message .file-info {
+    .file-info {
       flex: 1;
     }
-
-    .file-message .file-name {
+    .file-name {
       font-weight: 600;
       font-size: 14px;
       margin-bottom: 4px;
+      word-break: break-all;
     }
-
-    .file-message .file-size {
+    .file-size {
       font-size: 12px;
       opacity: 0.7;
     }
-
-    .file-message .download-btn {
+    .download-btn {
       padding: 8px 16px;
       background: var(--accent-primary);
       color: white;
@@ -546,6 +541,45 @@
       font-weight: 600;
       transition: var(--transition);
     }
+    .download-btn:hover {
+      transform: scale(1.02);
+    }
+    .image-preview {
+      max-width: 200px;
+      max-height: 150px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: var(--transition);
+    }
+    .image-preview:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    /* 图片放大模态框 */
+    .image-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      cursor: pointer;
+    }
+    .image-modal.active {
+      display: flex;
+    }
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+      animation: scaleIn 0.2s ease;
+    }
 
     .progress-bar {
       height: 6px;
@@ -554,7 +588,6 @@
       overflow: hidden;
       margin-top: 6px;
     }
-
     .progress-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
@@ -828,27 +861,18 @@
       border-left: 4px solid var(--accent-primary);
     }
 
-    .footer {
-      margin-top: 32px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 12px;
-    }
-
     ::-webkit-scrollbar {
       width: 8px;
     }
-
     ::-webkit-scrollbar-track {
       background: var(--bg-primary);
     }
-
     ::-webkit-scrollbar-thumb {
       background: var(--border-color);
       border-radius: 4px;
     }
 
-    /* 横屏响应式 - 侧边栏可收回 */
+    /* 横屏响应式 */
     @media (max-width: 768px), (orientation: landscape) {
       .sidebar {
         position: fixed;
@@ -858,15 +882,12 @@
         z-index: 50;
         transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
-
       .sidebar.open {
         left: 0;
       }
-
       .sidebar-expand-btn {
         display: flex;
       }
-
       .main-container {
         flex-direction: column;
       }
@@ -880,6 +901,11 @@
       <div class="spinner"></div>
       <p style="color: var(--text-secondary);">正在加载 P2P 网络...</p>
     </div>
+  </div>
+
+  <!-- 图片放大模态框 -->
+  <div class="image-modal" id="imageModal" onclick="closeImageModal()">
+    <img id="enlargedImage" src="">
   </div>
 
   <!-- 主界面 -->
@@ -902,7 +928,6 @@
       </div>
     </div>
     <div class="main-container">
-      <!-- 侧边栏 -->
       <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
           <h3>设备连接 <button class="sidebar-close-btn" onclick="closeSidebar()">✕</button></h3>
@@ -918,7 +943,6 @@
           <div class="empty-state"><div class="icon">🔌</div><h3>暂无连接设备</h3><p>生成或输入连接码开始连接</p></div>
         </div>
       </div>
-      <!-- 聊天区域 -->
       <div class="chat-area">
         <div class="chat-header"><h3 id="current-chat-title">选择设备开始聊天</h3></div>
         <div class="messages" id="messages"><div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>连接设备后即可发送消息</p></div></div>
@@ -934,7 +958,6 @@
     </div>
   </div>
 
-  <!-- 展开侧边栏按钮（悬浮球） -->
   <button class="sidebar-expand-btn" id="expandSidebarBtn" onclick="openSidebar()">☰</button>
 
   <!-- 模态框 -->
@@ -971,33 +994,28 @@
     </div>
   </div>
 
-  <!-- 二维码窗口 -->
   <div class="qrcode-modal-overlay" id="qrcodeWindowOverlay" onclick="if(event.target===this) closeQRCodeWindow()">
     <div class="qrcode-window">
       <button class="qrcode-window-close" onclick="closeQRCodeWindow()">✕</button>
       <h3>📱 扫码连接</h3>
-      <div class="qr-container">
-        <canvas id="qrCodeCanvas" width="200" height="200"></canvas>
-      </div>
+      <div class="qr-container"><canvas id="qrCodeCanvas" width="200" height="200"></canvas></div>
       <div class="qr-caption">请使用微信/浏览器扫码连接</div>
     </div>
   </div>
 
   <script>
-    // ========== 全局变量 - 与您第一次发的代码完全一致 ==========
-    let myDevice = 'phone', myRole = 'sender', myNickname = '', myConnectionCode = '';
-    let peer = null, connections = {}, currentChatPeerId = null, messages = {}, deviceAliases = {}, deviceConnectionCounts = {}, currentAliasPeerId = null, unreadMessages = {}, fileReceivers = {};
+    // ========== 全局变量 ==========
+    let myDevice = 'pc', myNickname = '', myConnectionCode = '';
+    let peer = null, connections = {}, currentChatPeerId = null, messages = {}, deviceAliases = {}, unreadMessages = {}, fileReceivers = {};
+    let currentAliasPeerId = null;
     const deviceLabels = { phone:'手机', tablet:'平板', pc:'电脑' };
 
-    // 自动检测设备类型
     function detectDeviceType() {
       const ua = navigator.userAgent;
       if (/tablet|ipad|android(?!.*mobile)/i.test(ua)) return 'tablet';
       if (/mobile|iphone|ipod|android.*mobile|windows phone/i.test(ua)) return 'phone';
       return 'pc';
     }
-
-    // 获取设备友好名称
     function getDeviceName() {
       const type = detectDeviceType();
       if (type === 'phone') return '我的手机';
@@ -1005,49 +1023,38 @@
       return '我的电脑';
     }
 
-    // 侧边栏控制
     function openSidebar() { document.getElementById('sidebar').classList.add('open'); }
     function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+    function closeImageModal() { document.getElementById('imageModal').classList.remove('active'); }
+    function showImageModal(url) { 
+      document.getElementById('enlargedImage').src = url;
+      document.getElementById('imageModal').classList.add('active');
+    }
 
-    // 二维码窗口
     function openQRCodeWindow() {
       const overlay = document.getElementById('qrcodeWindowOverlay');
       overlay.style.display = 'flex';
       if (peer && peer.id) {
         const url = `${window.location.origin}${window.location.pathname}?connect=${peer.id}`;
-        QRCode.toCanvas(document.getElementById('qrCodeCanvas'), url, { width: 200, margin: 1, color: { dark: '#000000', light: '#ffffff' } }, (err) => {
-          if (err) showToast('二维码生成失败');
-        });
+        QRCode.toCanvas(document.getElementById('qrCodeCanvas'), url, { width: 200, margin: 1 }, (err) => { if (err) showToast('二维码生成失败'); });
       } else {
-        setTimeout(() => {
-          if (peer && peer.id) {
-            const url = `${window.location.origin}${window.location.pathname}?connect=${peer.id}`;
-            QRCode.toCanvas(document.getElementById('qrCodeCanvas'), url, { width: 200 });
-          } else showToast('请等待P2P初始化');
-        }, 300);
+        setTimeout(() => { if (peer && peer.id) { const url = `${window.location.origin}${window.location.pathname}?connect=${peer.id}`; QRCode.toCanvas(document.getElementById('qrCodeCanvas'), url, { width: 200 }); } else showToast('请等待P2P初始化'); }, 300);
       }
     }
     function closeQRCodeWindow() { document.getElementById('qrcodeWindowOverlay').style.display = 'none'; }
 
-    // 启动应用 - 无选择界面，自动检测设备
     function startApp() {
       myDevice = detectDeviceType();
       myNickname = getDeviceName() + Math.floor(Math.random() * 100);
-      
       document.getElementById('display-nickname').textContent = myNickname;
       document.getElementById('display-role').textContent = `${deviceLabels[myDevice]} · 在线`;
       document.getElementById('user-avatar').textContent = myNickname.charAt(0).toUpperCase();
-      
       const savedAliases = localStorage.getItem('deviceAliases');
       if (savedAliases) deviceAliases = JSON.parse(savedAliases);
-      const savedCounts = localStorage.getItem('deviceConnectionCounts');
-      if (savedCounts) deviceConnectionCounts = JSON.parse(savedCounts);
-      
       initPeerJS();
     }
 
-    // 初始化PeerJS - 与您第一次发的代码完全一致
     function initPeerJS() {
       const peerId = 'p2p-' + Date.now().toString(36);
       myConnectionCode = peerId.replace('p2p-', '').substring(0, 8);
@@ -1055,7 +1062,6 @@
         peer = new Peer(peerId);
         peer.on('open', (id) => {
           myConnectionCode = id.replace('p2p-', '').substring(0, 8);
-          // 隐藏加载动画
           document.getElementById('loadingOverlay').style.opacity = '0';
           setTimeout(() => { document.getElementById('loadingOverlay').style.display = 'none'; }, 500);
           document.getElementById('main-screen').style.display = 'block';
@@ -1072,12 +1078,9 @@
       } catch (e) { showToast('初始化失败'); }
     }
 
-    // 处理连接 - 与您第一次发的代码完全一致
     function handleConnection(conn) {
       conn.on('open', () => {
         const peerId = conn.peer;
-        deviceConnectionCounts[peerId] = (deviceConnectionCounts[peerId] || 0) + 1;
-        localStorage.setItem('deviceConnectionCounts', JSON.stringify(deviceConnectionCounts));
         conn.send({ type: 'request-nickname' });
         if (Object.keys(connections).length === 0) currentChatPeerId = peerId;
         connections[peerId] = { conn, nickname: deviceAliases[peerId] || `设备 ${peerId.substring(0, 6)}`, online: true };
@@ -1087,32 +1090,26 @@
         conn.on('data', (data) => handleIncomingData(peerId, data));
         conn.on('close', () => {
           if (connections[peerId]) {
-            connections[peerId].online = false;
             delete messages[peerId];
             delete unreadMessages[peerId];
-            if (currentChatPeerId === peerId) {
-              currentChatPeerId = null;
-              document.getElementById('current-chat-title').textContent = '选择设备开始聊天';
-              displayMessages(peerId);
-            }
+            if (currentChatPeerId === peerId) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备开始聊天'; displayMessages(peerId); }
+            delete connections[peerId];
             updateDeviceList();
           }
         });
       });
     }
 
-    // 处理接收数据 - 与您第一次发的代码完全一致
     function handleIncomingData(peerId, data) {
       if (!messages[peerId]) messages[peerId] = [];
-      if (navigator.vibrate && myDevice === 'phone') navigator.vibrate(200);
       if (data.type === 'message') {
         unreadMessages[peerId] = (unreadMessages[peerId] || 0) + 1;
         messages[peerId].push({ content: data.content, sender: data.sender, sent: false, time: new Date().toLocaleTimeString() });
         if (currentChatPeerId === peerId) displayMessages(peerId);
+        if (myDevice === 'phone' && navigator.vibrate) navigator.vibrate(100);
       } else if (data.type === 'file-start') {
-        fileReceivers[data.fileId] = { fileName: data.fileName, fileSize: data.fileSize, totalChunks: data.totalChunks, chunks: [], sender: data.sender, startTime: Date.now() };
-        unreadMessages[peerId] = (unreadMessages[peerId] || 0) + 1;
-        messages[peerId].push({ type: 'progress', id: data.fileId, content: `正在接收: ${data.fileName} (0%)`, sent: false, time: new Date().toLocaleTimeString(), progress: 0 });
+        fileReceivers[data.fileId] = { fileName: data.fileName, fileSize: data.fileSize, totalChunks: data.totalChunks, chunks: [], sender: data.sender, isImage: /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(data.fileName) };
+        messages[peerId].push({ type: 'progress', id: data.fileId, content: `📁 接收中: ${data.fileName} 0%`, progress: 0, sent: false, time: new Date().toLocaleTimeString(), fileName: data.fileName });
         if (currentChatPeerId === peerId) displayMessages(peerId);
       } else if (data.type === 'file-chunk') {
         const r = fileReceivers[data.fileId];
@@ -1120,34 +1117,35 @@
           r.chunks[data.chunkIndex] = data.chunkData;
           const prog = Math.floor((r.chunks.filter(c => c !== undefined).length / r.totalChunks) * 100);
           const msg = messages[peerId].find(m => m.id === data.fileId);
-          if (msg) {
-            msg.content = `正在接收: ${r.fileName} (${prog}%)`;
-            msg.progress = prog;
-            if (currentChatPeerId === peerId) displayMessages(peerId);
-          }
+          if (msg) { msg.content = `📁 接收中: ${r.fileName} ${prog}%`; msg.progress = prog; if (currentChatPeerId === peerId) displayMessages(peerId); }
         }
       } else if (data.type === 'file-end') {
         const r = fileReceivers[data.fileId];
         if (r) {
-          const fileData = r.chunks.join('');
+          const fullData = r.chunks.join('');
+          const blob = dataURLtoBlob(fullData);
+          const url = URL.createObjectURL(blob);
           messages[peerId] = messages[peerId].filter(m => m.id !== data.fileId);
-          messages[peerId].push({ content: `文件: ${r.fileName}`, sender: r.sender, sent: false, time: new Date().toLocaleTimeString(), fileData, fileName: r.fileName });
+          messages[peerId].push({ type: 'file', fileURL: url, fileName: r.fileName, fileSize: r.fileSize, sender: r.sender, sent: false, time: new Date().toLocaleTimeString(), isImage: r.isImage });
           delete fileReceivers[data.fileId];
           if (currentChatPeerId === peerId) displayMessages(peerId);
         }
       } else if (data.type === 'request-nickname') {
         connections[peerId]?.conn.send({ type: 'nickname', nickname: myNickname });
       } else if (data.type === 'nickname') {
-        if (connections[peerId]) {
-          connections[peerId].nickname = data.nickname;
-          if (currentChatPeerId === peerId) document.getElementById('current-chat-title').textContent = data.nickname;
-          updateDeviceList();
-        }
+        if (connections[peerId]) { connections[peerId].nickname = data.nickname; if (currentChatPeerId === peerId) document.getElementById('current-chat-title').textContent = data.nickname; updateDeviceList(); }
       }
       updateDeviceList();
     }
 
-    function generateConnectionCode() { if (peer) { document.getElementById('my-connection-code').textContent = myConnectionCode; document.getElementById('connection-code-display').style.display = 'block'; showToast('连接码已生成'); } }
+    function dataURLtoBlob(dataURL) {
+      const arr = dataURL.split(','), mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]), u8arr = new Uint8Array(bstr.length);
+      for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
+      return new Blob([u8arr], { type: mime });
+    }
+
+    function generateConnectionCode() { if (peer) { showToast(`连接码: ${myConnectionCode}`); } }
     function checkUrlParams() { const p = new URLSearchParams(location.search).get('connect'); if (p) setTimeout(() => { if (peer && !connections[p]) { const conn = peer.connect(p, { reliable: true }); handleConnection(conn); } }, 1000); }
     function copyConnectionCode() { navigator.clipboard.writeText(myConnectionCode).then(() => showToast('已复制')); }
     function connectWithCode() { document.getElementById('code-modal').classList.add('active'); }
@@ -1156,12 +1154,7 @@
       if (!code) return showToast('请输入连接码');
       const peerId = 'p2p-' + code;
       if (connections[peerId]) return showToast('已连接');
-      try {
-        const conn = peer.connect(peerId, { reliable: true });
-        handleConnection(conn);
-        closeCodeModal();
-        document.getElementById('connection-code-input').value = '';
-      } catch (e) { showToast('连接失败'); }
+      try { const conn = peer.connect(peerId, { reliable: true }); handleConnection(conn); closeCodeModal(); document.getElementById('connection-code-input').value = ''; } catch (e) { showToast('连接失败'); }
     }
     function closeCodeModal() { document.getElementById('code-modal').classList.remove('active'); }
     
@@ -1169,7 +1162,7 @@
       const list = document.getElementById('device-list');
       const devs = Object.values(connections);
       if (devs.length === 0) list.innerHTML = `<div class="empty-state"><div class="icon">🔌</div><h3>暂无连接设备</h3><p>生成或输入连接码开始连接</p></div>`;
-      else list.innerHTML = devs.map(d => `<div class="device-item ${currentChatPeerId === d.conn.peer ? 'active' : ''} ${unreadMessages[d.conn.peer] && currentChatPeerId !== d.conn.peer ? 'has-unread' : ''}" onclick="selectDevice('${d.conn.peer}')"><div class="device-name"><span>${d.nickname}</span></div><div class="device-status"><span class="status-dot ${d.online ? 'online' : ''}"></span>${d.online ? '已连接' : '未连接'}</div><div class="device-actions"><button class="device-action-btn alias" onclick="event.stopPropagation();showAliasModal('${d.conn.peer}')">备注</button><button class="device-action-btn disconnect" onclick="event.stopPropagation();disconnectDevice('${d.conn.peer}')">断开</button></div></div>`).join('');
+      else list.innerHTML = devs.map(d => `<div class="device-item ${currentChatPeerId === d.conn.peer ? 'active' : ''} ${unreadMessages[d.conn.peer] && currentChatPeerId !== d.conn.peer ? 'has-unread' : ''}" onclick="selectDevice('${d.conn.peer}')"><div class="device-name"><span>${d.nickname}</span></div><div class="device-status"><span class="status-dot online"></span>已连接</div><div class="device-actions"><button class="device-action-btn alias" onclick="event.stopPropagation();showAliasModal('${d.conn.peer}')">备注</button><button class="device-action-btn disconnect" onclick="event.stopPropagation();disconnectDevice('${d.conn.peer}')">断开</button></div></div>`).join('');
     }
     
     function selectDevice(pid) { currentChatPeerId = pid; unreadMessages[pid] = 0; document.getElementById('current-chat-title').textContent = connections[pid]?.nickname || '选择设备'; updateDeviceList(); displayMessages(pid); closeSidebar(); }
@@ -1178,9 +1171,27 @@
       const container = document.getElementById('messages');
       const msgs = messages[peerId] || [];
       if (msgs.length === 0) container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>发送第一条消息</p></div>`;
-      else container.innerHTML = msgs.map(m => `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender || (m.sent ? myNickname : connections[peerId]?.nickname)}</div>${m.content || ''}<div class="message-time">${m.time}</div></div></div>`).join('');
+      else container.innerHTML = msgs.map(m => {
+        if (m.type === 'file') {
+          if (m.isImage) return `<div class="message received"><div class="message-content"><div class="message-sender">${m.sender}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
+          return `<div class="message received"><div class="message-content"><div class="message-sender">${m.sender}</div><div class="file-message"><div class="file-info"><div class="file-name">📄 ${m.fileName}</div><div class="file-size">${(m.fileSize/1024).toFixed(1)} KB</div></div><button class="download-btn" onclick="downloadFile('${m.fileURL}', '${m.fileName}')">下载</button></div><div class="message-time">${m.time}</div></div></div>`;
+        }
+        if (m.type === 'progress') return `<div class="message received"><div class="message-content"><div>${m.content}</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${m.progress}%"></div></div><div class="message-time">${m.time}</div></div></div>`;
+        return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender || (m.sent ? myNickname : connections[peerId]?.nickname)}</div>${escapeHtml(m.content)}<div class="message-time">${m.time}</div></div></div>`;
+      }).join('');
       container.scrollTop = container.scrollHeight;
     }
+    
+    function downloadFile(url, filename) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
     
     function disconnectDevice(pid) { if (confirm('断开连接？')) { connections[pid]?.conn.close(); delete connections[pid]; if (currentChatPeerId === pid) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备'; displayMessages(pid); } updateDeviceList(); } }
     
@@ -1202,59 +1213,50 @@
       document.getElementById('message-input').value = '';
     }
     
-    function updateSendButton() { document.getElementById('send-btn').textContent = document.getElementById('send-to-all').checked ? '全部发送' : '发送'; }
-    function handleKeyPress(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
-    function showAliasModal(pid) { currentAliasPeerId = pid; document.getElementById('alias-input').value = deviceAliases[pid] || ''; document.getElementById('alias-modal').classList.add('active'); }
-    function closeAliasModal() { document.getElementById('alias-modal').classList.remove('active'); }
-    function saveAlias() { if (!currentAliasPeerId) return; const a = document.getElementById('alias-input').value.trim(); if (a) { deviceAliases[currentAliasPeerId] = a; localStorage.setItem('deviceAliases', JSON.stringify(deviceAliases)); if (connections[currentAliasPeerId]) connections[currentAliasPeerId].nickname = a; updateDeviceList(); } closeAliasModal(); }
-    
-    // 文件发送 - 完整实现
-    function showFileInput() {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.onchange = (e) => {
-        if (e.target.files[0]) sendFileToAll(e.target.files[0]);
-      };
-      input.click();
-    }
-    
-    function sendFileToAll(file) {
-      const sendAll = document.getElementById('send-to-all').checked;
-      let targets = sendAll ? Object.keys(connections) : (currentChatPeerId ? [currentChatPeerId] : []);
-      if (targets.length === 0) { showToast('请选择设备'); return; }
-      targets.forEach(pid => {
-        sendFileToPeer(pid, file);
-      });
-    }
-    
     function sendFileToPeer(peerId, file) {
       const conn = connections[peerId]?.conn;
-      if (!conn || !conn.open) return;
+      if (!conn || !conn.open) return false;
       const fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
       const chunkSize = 16384;
       let offset = 0;
       const totalChunks = Math.ceil(file.size / chunkSize);
-      
       conn.send({ type: 'file-start', fileId, fileName: file.name, fileSize: file.size, totalChunks, sender: myNickname });
-      
       function sendNextChunk() {
         const slice = file.slice(offset, offset + chunkSize);
         const reader = new FileReader();
         reader.onload = (e) => {
           conn.send({ type: 'file-chunk', fileId, chunkIndex: offset / chunkSize, chunkData: e.target.result });
           offset += chunkSize;
-          if (offset < file.size) {
-            sendNextChunk();
-          } else {
-            conn.send({ type: 'file-end', fileId });
-            showToast(`文件 ${file.name} 发送完成`);
-          }
+          if (offset < file.size) sendNextChunk();
+          else conn.send({ type: 'file-end', fileId });
         };
         reader.readAsDataURL(slice);
       }
       sendNextChunk();
+      return true;
     }
     
+    function showFileInput() {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.onchange = (e) => {
+        if (e.target.files[0]) {
+          const file = e.target.files[0];
+          const sendAll = document.getElementById('send-to-all').checked;
+          let targets = sendAll ? Object.keys(connections) : (currentChatPeerId ? [currentChatPeerId] : []);
+          if (targets.length === 0) { showToast('请选择设备'); return; }
+          targets.forEach(pid => { sendFileToPeer(pid, file); });
+          showToast(`发送文件: ${file.name}`);
+        }
+      };
+      input.click();
+    }
+    
+    function updateSendButton() { document.getElementById('send-btn').textContent = document.getElementById('send-to-all').checked ? '全部发送' : '发送'; }
+    function handleKeyPress(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+    function showAliasModal(pid) { currentAliasPeerId = pid; document.getElementById('alias-input').value = deviceAliases[pid] || ''; document.getElementById('alias-modal').classList.add('active'); }
+    function closeAliasModal() { document.getElementById('alias-modal').classList.remove('active'); }
+    function saveAlias() { if (!currentAliasPeerId) return; const a = document.getElementById('alias-input').value.trim(); if (a) { deviceAliases[currentAliasPeerId] = a; localStorage.setItem('deviceAliases', JSON.stringify(deviceAliases)); if (connections[currentAliasPeerId]) connections[currentAliasPeerId].nickname = a; updateDeviceList(); } closeAliasModal(); }
     function toggleTheme() { const cur = document.documentElement.getAttribute('data-theme') || 'light'; const n = cur === 'light' ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', n); localStorage.setItem('theme', n); updateThemeIcon(n); }
     function updateThemeIcon(t) { const i = t === 'light' ? '🌙' : '☀️'; document.getElementById('theme-icon') && (document.getElementById('theme-icon').textContent = i); }
     function showToast(m) { const t = document.createElement('div'); t.className = 'toast'; t.textContent = m; document.body.appendChild(t); setTimeout(() => t.remove(), 3000); }
@@ -1262,7 +1264,6 @@
     function closeContactModal() { document.getElementById('contact-modal').classList.remove('active'); }
     function openWebEmail() { window.open('https://mail.qq.com/cgi-bin/qm_share?t=qm_mailme&email=3530388417@qq.com', '_blank'); }
 
-    // 启动
     window.addEventListener('load', () => {
       const theme = localStorage.getItem('theme');
       if (theme) { document.documentElement.setAttribute('data-theme', theme); updateThemeIcon(theme); }
