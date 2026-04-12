@@ -1155,10 +1155,14 @@
       if (msgs.length === 0) container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>发送第一条消息</p></div>`;
       else container.innerHTML = msgs.map(m => {
         if (m.type === 'file') {
-          if (m.isImage) return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
+          if (m.isImage) {
+            return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
+          }
           return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender}</div><div class="file-message"><div class="file-info"><div class="file-name">📄 ${m.fileName}</div><div class="file-size">${(m.fileSize/1024).toFixed(1)} KB</div></div><button class="download-btn" onclick="downloadFile('${m.fileURL}', '${m.fileName}')">下载</button></div><div class="message-time">${m.time}</div></div></div>`;
         }
-        if (m.type === 'progress') return `<div class="message received"><div class="message-content"><div>${m.content}</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${m.progress}%"></div></div><div class="message-time">${m.time}</div></div></div>`;
+        if (m.type === 'progress') {
+          return `<div class="message received"><div class="message-content"><div>${m.content}</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${m.progress}%"></div></div><div class="message-time">${m.time}</div></div></div>`;
+        }
         return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender || (m.sent ? myNickname : connections[peerId]?.nickname)}</div>${escapeHtml(m.content)}<div class="message-time">${m.time}</div></div></div>`;
       }).join('');
       container.scrollTop = container.scrollHeight;
@@ -1212,14 +1216,25 @@
         reader.onload = (e) => {
           conn.send({ type: 'file-chunk', fileId, chunkIndex: offset / chunkSize, chunkData: e.target.result });
           offset += chunkSize;
-          if (offset < file.size) sendNextChunk();
-          else {
+          if (offset < file.size) {
+            sendNextChunk();
+          } else {
             conn.send({ type: 'file-end', fileId });
-            // 发送方自己保存文件预览
+            // 发送方自己保存文件预览和下载链接
             const localUrl = URL.createObjectURL(file);
             if (!messages[peerId]) messages[peerId] = [];
-            messages[peerId].push({ type: 'file', fileURL: localUrl, fileName: file.name, fileSize: file.size, sender: myNickname, sent: true, time: new Date().toLocaleTimeString(), isImage: isImage });
+            messages[peerId].push({ 
+              type: 'file', 
+              fileURL: localUrl, 
+              fileName: file.name, 
+              fileSize: file.size, 
+              sender: myNickname, 
+              sent: true, 
+              time: new Date().toLocaleTimeString(), 
+              isImage: isImage 
+            });
             if (currentChatPeerId === peerId) displayMessages(peerId);
+            showToast(`文件 ${file.name} 发送完成`);
           }
         };
         reader.readAsDataURL(slice);
