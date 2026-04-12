@@ -547,6 +547,26 @@
       opacity: 0.9;
       transform: scale(1.02);
     }
+    .progress-container {
+      margin-top: 8px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--border-color);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+      transition: width 0.2s ease;
+    }
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
 
     .image-modal {
       position: fixed;
@@ -569,19 +589,6 @@
       max-height: 90%;
       object-fit: contain;
       animation: scaleIn 0.2s ease;
-    }
-
-    .progress-bar {
-      height: 6px;
-      background: var(--border-color);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-      transition: width 0.3s ease;
     }
 
     .chat-input-area {
@@ -988,9 +995,12 @@
   <script>
     // ========== 全局变量 ==========
     let myDevice = 'pc', myNickname = '', myConnectionCode = '';
-    let peer = null, connections = {}, currentChatPeerId = null, messages = {}, deviceAliases = {}, unreadMessages = {}, fileReceivers = {};
+    let peer = null, connections = {}, currentChatPeerId = null, messages = {}, deviceAliases = {}, unreadMessages = {};
     let currentAliasPeerId = null;
     const deviceLabels = { phone:'手机', tablet:'平板', pc:'电脑' };
+    
+    // 文件接收缓冲区
+    let fileReceivers = {};
 
     function detectDeviceType() {
       const ua = navigator.userAgent;
@@ -1074,7 +1084,7 @@
           if (connections[peerId]) {
             delete messages[peerId];
             delete unreadMessages[peerId];
-            if (currentChatPeerId === peerId) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备开始聊天'; displayMessages(peerId); }
+            if (currentChatPeerId === peerId) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备开始聊天'; renderMessages(peerId); }
             delete connections[peerId];
             updateDeviceList();
           }
@@ -1091,40 +1101,132 @@
 
     function handleIncomingData(peerId, data) {
       if (!messages[peerId]) messages[peerId] = [];
+      
       if (data.type === 'message') {
         unreadMessages[peerId] = (unreadMessages[peerId] || 0) + 1;
         messages[peerId].push({ content: data.content, sender: data.sender, sent: false, time: new Date().toLocaleTimeString() });
-        if (currentChatPeerId === peerId) displayMessages(peerId);
+        if (currentChatPeerId === peerId) renderMessages(peerId);
         if (myDevice === 'phone' && navigator.vibrate) navigator.vibrate(100);
-      } else if (data.type === 'file-start') {
-        fileReceivers[data.fileId] = { fileName: data.fileName, fileSize: data.fileSize, totalChunks: data.totalChunks, chunks: [], sender: data.sender, isImage: /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(data.fileName) };
-        messages[peerId].push({ type: 'progress', id: data.fileId, content: `📁 接收中: ${data.fileName} 0%`, progress: 0, sent: false, time: new Date().toLocaleTimeString(), fileName: data.fileName });
-        if (currentChatPeerId === peerId) displayMessages(peerId);
-      } else if (data.type === 'file-chunk') {
+      } 
+      else if (data.type === 'file-start') {
+        // 创建进度消息
+        const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(data.fileName);
+        const progressMsg = { 
+          type: 'progress', 
+          fileId: data.fileId,
+          fileName: data.fileName,
+          fileSize: data.fileSize,
+          sender: data.sender,
+          progress: 0,
+          isImage: isImage,
+          time: new Date().toLocaleTimeString(),
+          chunks: [],
+          totalChunks: data.totalChunks
+        };
+        messages[peerId].push(progressMsg);
+        fileReceivers[data.fileId] = progressMsg;
+        if (currentChatPeerId === peerId) renderMessages(peerId);
+      } 
+      else if (data.type === 'file-chunk') {
         const r = fileReceivers[data.fileId];
         if (r) {
           r.chunks[data.chunkIndex] = data.chunkData;
-          const prog = Math.floor((r.chunks.filter(c => c !== undefined).length / r.totalChunks) * 100);
-          const msg = messages[peerId].find(m => m.id === data.fileId);
-          if (msg) { msg.content = `📁 接收中: ${r.fileName} ${prog}%`; msg.progress = prog; if (currentChatPeerId === peerId) displayMessages(peerId); }
+          const received = r.chunks.filter(c => c !== undefined).length;
+          const prog = Math.floor((received / r.totalChunks) * 100);
+          r.progress = prog;
+          // 只更新进度条DOM，不重新渲染整个聊天区域
+          updateProgressBar(peerId, data.fileId, prog);
         }
-      } else if (data.type === 'file-end') {
+      } 
+      else if (data.type === 'file-end') {
         const r = fileReceivers[data.fileId];
         if (r) {
           const fullData = r.chunks.join('');
           const blob = dataURLtoBlob(fullData);
           const url = URL.createObjectURL(blob);
-          messages[peerId] = messages[peerId].filter(m => m.id !== data.fileId);
-          messages[peerId].push({ type: 'file', fileURL: url, fileName: r.fileName, fileSize: r.fileSize, sender: r.sender, sent: false, time: new Date().toLocaleTimeString(), isImage: r.isImage });
+          // 将进度消息替换为完成消息
+          const index = messages[peerId].findIndex(m => m.fileId === data.fileId);
+          if (index !== -1) {
+            messages[peerId][index] = {
+              type: 'file',
+              fileURL: url,
+              fileName: r.fileName,
+              fileSize: r.fileSize,
+              sender: r.sender,
+              sent: false,
+              time: r.time,
+              isImage: r.isImage
+            };
+          }
           delete fileReceivers[data.fileId];
-          if (currentChatPeerId === peerId) displayMessages(peerId);
+          if (currentChatPeerId === peerId) renderMessages(peerId);
+          showToast(`文件 ${r.fileName} 接收完成`);
         }
-      } else if (data.type === 'request-nickname') {
+      }
+      else if (data.type === 'request-nickname') {
         connections[peerId]?.conn.send({ type: 'nickname', nickname: myNickname });
-      } else if (data.type === 'nickname') {
-        if (connections[peerId]) { connections[peerId].nickname = data.nickname; if (currentChatPeerId === peerId) document.getElementById('current-chat-title').textContent = data.nickname; updateDeviceList(); }
+      } 
+      else if (data.type === 'nickname') {
+        if (connections[peerId]) { 
+          connections[peerId].nickname = data.nickname; 
+          if (currentChatPeerId === peerId) document.getElementById('current-chat-title').textContent = data.nickname; 
+          updateDeviceList(); 
+        }
       }
       updateDeviceList();
+    }
+
+    // 单独更新进度条，避免整个聊天区域闪烁
+    function updateProgressBar(peerId, fileId, progress) {
+      if (currentChatPeerId !== peerId) return;
+      const progressElement = document.getElementById(`progress-${fileId}`);
+      if (progressElement) {
+        const fill = progressElement.querySelector('.progress-bar-fill');
+        const text = progressElement.querySelector('.progress-text');
+        if (fill) fill.style.width = `${progress}%`;
+        if (text) text.textContent = `${progress}%`;
+      }
+    }
+
+    function renderMessages(peerId) {
+      const container = document.getElementById('messages');
+      const msgs = messages[peerId] || [];
+      if (msgs.length === 0) {
+        container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>发送第一条消息</p></div>`;
+        return;
+      }
+      
+      let html = '';
+      for (let i = 0; i < msgs.length; i++) {
+        const m = msgs[i];
+        if (m.type === 'file') {
+          if (m.isImage) {
+            html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
+          } else {
+            html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><div class="file-message"><div class="file-info"><div class="file-name">📄 ${escapeHtml(m.fileName)}</div><div class="file-size">${(m.fileSize/1024).toFixed(1)} KB</div></div><button class="download-btn" onclick="downloadFile('${m.fileURL}', '${escapeHtml(m.fileName)}')">下载</button></div><div class="message-time">${m.time}</div></div></div>`;
+          }
+        } else if (m.type === 'progress') {
+          html += `<div class="message received"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><div>📁 接收中: ${escapeHtml(m.fileName)}</div><div class="progress-container" id="progress-${m.fileId}"><div class="progress-bar"><div class="progress-bar-fill" style="width:${m.progress}%"></div></div><div class="progress-text">${m.progress}%</div></div><div class="message-time">${m.time}</div></div></div>`;
+        } else {
+          html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender || (m.sent ? myNickname : connections[peerId]?.nickname))}</div>${escapeHtml(m.content)}<div class="message-time">${m.time}</div></div></div>`;
+        }
+      }
+      container.innerHTML = html;
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    function downloadFile(url, filename) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    
+    function escapeHtml(str) { 
+      if (!str) return '';
+      return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); 
     }
 
     function generateConnectionCode() { if (peer) { showToast(`连接码: ${myConnectionCode}`); } }
@@ -1144,42 +1246,19 @@
       const list = document.getElementById('device-list');
       const devs = Object.values(connections);
       if (devs.length === 0) list.innerHTML = `<div class="empty-state"><div class="icon">🔌</div><h3>暂无连接设备</h3><p>生成或输入连接码开始连接</p></div>`;
-      else list.innerHTML = devs.map(d => `<div class="device-item ${currentChatPeerId === d.conn.peer ? 'active' : ''} ${unreadMessages[d.conn.peer] && currentChatPeerId !== d.conn.peer ? 'has-unread' : ''}" onclick="selectDevice('${d.conn.peer}')"><div class="device-name"><span>${d.nickname}</span></div><div class="device-status"><span class="status-dot online"></span>已连接</div><div class="device-actions"><button class="device-action-btn alias" onclick="event.stopPropagation();showAliasModal('${d.conn.peer}')">备注</button><button class="device-action-btn disconnect" onclick="event.stopPropagation();disconnectDevice('${d.conn.peer}')">断开</button></div></div>`).join('');
+      else list.innerHTML = devs.map(d => `<div class="device-item ${currentChatPeerId === d.conn.peer ? 'active' : ''} ${unreadMessages[d.conn.peer] && currentChatPeerId !== d.conn.peer ? 'has-unread' : ''}" onclick="selectDevice('${d.conn.peer}')"><div class="device-name"><span>${escapeHtml(d.nickname)}</span></div><div class="device-status"><span class="status-dot online"></span>已连接</div><div class="device-actions"><button class="device-action-btn alias" onclick="event.stopPropagation();showAliasModal('${d.conn.peer}')">备注</button><button class="device-action-btn disconnect" onclick="event.stopPropagation();disconnectDevice('${d.conn.peer}')">断开</button></div></div>`).join('');
     }
     
-    function selectDevice(pid) { currentChatPeerId = pid; unreadMessages[pid] = 0; document.getElementById('current-chat-title').textContent = connections[pid]?.nickname || '选择设备'; updateDeviceList(); displayMessages(pid); closeSidebar(); }
-    
-    function displayMessages(peerId) {
-      const container = document.getElementById('messages');
-      const msgs = messages[peerId] || [];
-      if (msgs.length === 0) container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>发送第一条消息</p></div>`;
-      else container.innerHTML = msgs.map(m => {
-        if (m.type === 'file') {
-          if (m.isImage) {
-            return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
-          }
-          return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender}</div><div class="file-message"><div class="file-info"><div class="file-name">📄 ${m.fileName}</div><div class="file-size">${(m.fileSize/1024).toFixed(1)} KB</div></div><button class="download-btn" onclick="downloadFile('${m.fileURL}', '${m.fileName}')">下载</button></div><div class="message-time">${m.time}</div></div></div>`;
-        }
-        if (m.type === 'progress') {
-          return `<div class="message received"><div class="message-content"><div>${m.content}</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${m.progress}%"></div></div><div class="message-time">${m.time}</div></div></div>`;
-        }
-        return `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${m.sender || (m.sent ? myNickname : connections[peerId]?.nickname)}</div>${escapeHtml(m.content)}<div class="message-time">${m.time}</div></div></div>`;
-      }).join('');
-      container.scrollTop = container.scrollHeight;
+    function selectDevice(pid) { 
+      currentChatPeerId = pid; 
+      unreadMessages[pid] = 0; 
+      document.getElementById('current-chat-title').textContent = connections[pid]?.nickname || '选择设备'; 
+      updateDeviceList(); 
+      renderMessages(pid); 
+      closeSidebar(); 
     }
     
-    function downloadFile(url, filename) {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-    
-    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
-    
-    function disconnectDevice(pid) { if (confirm('断开连接？')) { connections[pid]?.conn.close(); delete connections[pid]; if (currentChatPeerId === pid) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备'; displayMessages(pid); } updateDeviceList(); } }
+    function disconnectDevice(pid) { if (confirm('断开连接？')) { connections[pid]?.conn.close(); delete connections[pid]; if (currentChatPeerId === pid) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备'; renderMessages(pid); } updateDeviceList(); } }
     
     function sendMessage() {
       const msg = document.getElementById('message-input').value.trim();
@@ -1195,7 +1274,7 @@
           messages[pid].push({ content: msg, sender: myNickname, sent: true, time: new Date().toLocaleTimeString() });
         }
       });
-      displayMessages(currentChatPeerId || targets[0]);
+      renderMessages(currentChatPeerId || targets[0]);
       document.getElementById('message-input').value = '';
     }
     
@@ -1210,6 +1289,21 @@
       
       conn.send({ type: 'file-start', fileId, fileName: file.name, fileSize: file.size, totalChunks, sender: myNickname });
       
+      // 发送方立即显示自己的文件消息（带下载按钮）
+      const localUrl = URL.createObjectURL(file);
+      if (!messages[peerId]) messages[peerId] = [];
+      messages[peerId].push({ 
+        type: 'file', 
+        fileURL: localUrl, 
+        fileName: file.name, 
+        fileSize: file.size, 
+        sender: myNickname, 
+        sent: true, 
+        time: new Date().toLocaleTimeString(), 
+        isImage: isImage 
+      });
+      if (currentChatPeerId === peerId) renderMessages(peerId);
+      
       function sendNextChunk() {
         const slice = file.slice(offset, offset + chunkSize);
         const reader = new FileReader();
@@ -1220,20 +1314,6 @@
             sendNextChunk();
           } else {
             conn.send({ type: 'file-end', fileId });
-            // 发送方自己保存文件预览和下载链接
-            const localUrl = URL.createObjectURL(file);
-            if (!messages[peerId]) messages[peerId] = [];
-            messages[peerId].push({ 
-              type: 'file', 
-              fileURL: localUrl, 
-              fileName: file.name, 
-              fileSize: file.size, 
-              sender: myNickname, 
-              sent: true, 
-              time: new Date().toLocaleTimeString(), 
-              isImage: isImage 
-            });
-            if (currentChatPeerId === peerId) displayMessages(peerId);
             showToast(`文件 ${file.name} 发送完成`);
           }
         };
