@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>P2P实时通信 · 文件传输</title>
+  <title>P2P实时通信 · 高速文件传输</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <style>
@@ -68,10 +68,7 @@
       z-index: 9999;
       transition: opacity 0.5s ease;
     }
-    .loading-spinner {
-      text-align: center;
-      animation: fadeIn 0.4s ease;
-    }
+    .loading-spinner { text-align: center; animation: fadeIn 0.4s ease; }
     .spinner {
       width: 48px;
       height: 48px;
@@ -95,12 +92,7 @@
       to { opacity: 1; transform: translateX(0); }
     }
 
-    #main-screen {
-      display: none;
-      min-height: 100vh;
-      animation: fadeIn 0.5s ease;
-    }
-
+    #main-screen { display: none; min-height: 100vh; animation: fadeIn 0.5s ease; }
     .header {
       background: var(--bg-secondary);
       padding: 16px 24px;
@@ -113,13 +105,7 @@
       z-index: 100;
       backdrop-filter: blur(10px);
     }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
+    .header-left { display: flex; align-items: center; gap: 16px; }
     .logo {
       font-size: 24px;
       font-weight: 800;
@@ -128,7 +114,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-
     .user-info {
       display: flex;
       align-items: center;
@@ -137,7 +122,6 @@
       background: var(--bg-tertiary);
       border-radius: 24px;
     }
-
     .user-avatar {
       width: 36px;
       height: 36px;
@@ -150,28 +134,10 @@
       font-weight: bold;
       font-size: 14px;
     }
-
-    .user-details {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .user-name {
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .user-role {
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
+    .user-details { display: flex; flex-direction: column; }
+    .user-name { font-weight: 600; font-size: 14px; }
+    .user-role { font-size: 12px; color: var(--text-secondary); }
+    .header-right { display: flex; align-items: center; gap: 12px; }
     .header-btn {
       padding: 10px 16px;
       background: var(--bg-tertiary);
@@ -186,13 +152,7 @@
       align-items: center;
       gap: 8px;
     }
-
-    .header-btn:hover {
-      background: var(--accent-primary);
-      color: white;
-      transform: translateY(-2px);
-    }
-
+    .header-btn:hover { background: var(--accent-primary); color: white; transform: translateY(-2px); }
     .theme-toggle-small {
       width: 44px;
       height: 44px;
@@ -206,18 +166,8 @@
       align-items: center;
       justify-content: center;
     }
-
-    .theme-toggle-small:hover {
-      transform: rotate(180deg);
-      background: var(--accent-primary);
-    }
-
-    .main-container {
-      display: flex;
-      height: calc(100vh - 70px);
-      overflow: hidden;
-    }
-
+    .theme-toggle-small:hover { transform: rotate(180deg); background: var(--accent-primary); }
+    .main-container { display: flex; height: calc(100vh - 70px); overflow: hidden; }
     .sidebar {
       width: 320px;
       background: var(--bg-secondary);
@@ -227,12 +177,7 @@
       transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       position: relative;
     }
-
-    .sidebar-header {
-      padding: 20px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
+    .sidebar-header { padding: 20px; border-bottom: 1px solid var(--border-color); }
     .sidebar-header h3 {
       font-size: 16px;
       color: var(--text-primary);
@@ -242,7 +187,6 @@
       justify-content: space-between;
       align-items: center;
     }
-
     .sidebar-close-btn {
       background: none;
       border: none;
@@ -257,13 +201,7 @@
       border-radius: 8px;
       transition: var(--transition);
     }
-
-    .sidebar-close-btn:hover {
-      background: var(--bg-tertiary);
-      color: var(--accent-danger);
-      transform: rotate(90deg);
-    }
-
+    .sidebar-close-btn:hover { background: var(--bg-tertiary); color: var(--accent-danger); transform: rotate(90deg); }
     .action-btn {
       width: 100%;
       padding: 14px;
@@ -281,16 +219,8 @@
       justify-content: center;
       gap: 8px;
     }
-
-    .action-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .action-btn.secondary {
-      background: var(--accent-success);
-    }
-
+    .action-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .action-btn.secondary { background: var(--accent-success); }
     .connection-code-display {
       background: var(--bg-tertiary);
       padding: 16px;
@@ -298,13 +228,7 @@
       margin-top: 16px;
       text-align: center;
     }
-
-    .connection-code-display .label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-    }
-
+    .connection-code-display .label { font-size: 12px; color: var(--text-secondary); margin-bottom: 8px; }
     .connection-code-display .code {
       font-size: 24px;
       font-weight: 700;
@@ -313,13 +237,7 @@
       cursor: pointer;
       user-select: all;
     }
-
-    .device-list {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-    }
-
+    .device-list { flex: 1; overflow-y: auto; padding: 16px; }
     .device-item {
       padding: 16px;
       border-radius: 12px;
@@ -331,17 +249,8 @@
       animation: slideIn 0.3s ease;
       position: relative;
     }
-
-    .device-item:hover {
-      background: var(--bg-tertiary);
-      transform: translateX(4px);
-    }
-
-    .device-item.active {
-      border-color: var(--accent-primary);
-      background: rgba(102, 126, 234, 0.1);
-    }
-
+    .device-item:hover { background: var(--bg-tertiary); transform: translateX(4px); }
+    .device-item.active { border-color: var(--accent-primary); background: rgba(102, 126, 234, 0.1); }
     .device-item.has-unread::after {
       content: '';
       position: absolute;
@@ -353,464 +262,69 @@
       border-radius: 50%;
       animation: pulse 2s infinite;
     }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-
-    .device-name {
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--text-primary);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .device-status {
-      font-size: 12px;
-      color: var(--text-secondary);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--text-muted);
-    }
-
-    .status-dot.online {
-      background: var(--accent-success);
-      animation: pulse 2s infinite;
-    }
-
-    .device-actions {
-      margin-top: 12px;
-      display: flex;
-      gap: 8px;
-    }
-
-    .device-action-btn {
-      flex: 1;
-      padding: 8px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-
-    .device-action-btn.disconnect {
-      background: var(--accent-danger);
-      color: white;
-    }
-
-    .device-action-btn.alias {
-      background: var(--accent-primary);
-      color: white;
-    }
-
-    .chat-area {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      background: var(--bg-primary);
-    }
-
-    .chat-header {
-      padding: 20px 24px;
-      background: var(--bg-secondary);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .chat-header h3 {
-      font-size: 20px;
-      color: var(--text-primary);
-      font-weight: 700;
-    }
-
-    .messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .message {
-      animation: messageIn 0.3s ease;
-    }
-
-    @keyframes messageIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .message-content {
-      max-width: 70%;
-      padding: 16px 20px;
-      border-radius: 20px;
-      position: relative;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .message.sent {
-      display: flex;
-      justify-content: flex-end;
-    }
-
-    .message.sent .message-content {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-      border-bottom-right-radius: 6px;
-    }
-
-    .message.received {
-      display: flex;
-      justify-content: flex-start;
-    }
-
-    .message.received .message-content {
-      background: var(--bg-secondary);
-      color: var(--text-primary);
-      border-bottom-left-radius: 6px;
-    }
-
-    .message-time {
-      font-size: 11px;
-      margin-top: 6px;
-      opacity: 0.7;
-    }
-
-    .message-sender {
-      font-size: 12px;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: var(--text-secondary);
-    }
-
-    .file-message {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      background: var(--bg-tertiary);
-      border-radius: 10px;
-      margin-top: 8px;
-      flex-wrap: wrap;
-    }
-    .file-info {
-      flex: 1;
-    }
-    .file-name {
-      font-weight: 600;
-      font-size: 14px;
-      margin-bottom: 4px;
-      word-break: break-all;
-    }
-    .file-size {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-    .download-btn {
-      padding: 8px 16px;
-      background: var(--accent-primary);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 600;
-      transition: var(--transition);
-    }
-    .download-btn:hover {
-      transform: scale(1.02);
-    }
-    .image-preview {
-      max-width: 200px;
-      max-height: 150px;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: var(--transition);
-    }
-    .image-preview:hover {
-      opacity: 0.9;
-      transform: scale(1.02);
-    }
-    .progress-container {
-      margin-top: 8px;
-    }
-    .progress-bar {
-      height: 6px;
-      background: var(--border-color);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-top: 6px;
-    }
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-      transition: width 0.2s ease;
-    }
-    .progress-text {
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-
-    .image-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-      cursor: pointer;
-    }
-    .image-modal.active {
-      display: flex;
-    }
-    .image-modal img {
-      max-width: 90%;
-      max-height: 90%;
-      object-fit: contain;
-      animation: scaleIn 0.2s ease;
-    }
-
-    .chat-input-area {
-      padding: 20px 24px;
-      background: var(--bg-secondary);
-      border-top: 1px solid var(--border-color);
-    }
-
-    .input-container {
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-    }
-
-    .send-to-all-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-
-    #message-input {
-      flex: 1;
-      padding: 14px 20px;
-      border: 2px solid var(--border-color);
-      border-radius: 24px;
-      font-size: 16px;
-      resize: none;
-      height: 52px;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-    }
-
-    #message-input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-    }
-
-    .send-btn {
-      padding: 14px 28px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-      border: none;
-      border-radius: 24px;
-      cursor: pointer;
-      font-weight: 700;
-      transition: var(--transition);
-    }
-
-    .send-btn:hover {
-      transform: scale(1.02);
-    }
-
-    .icon-btn {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
-      border: none;
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-      cursor: pointer;
-      font-size: 20px;
-      transition: var(--transition);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .icon-btn:hover {
-      background: var(--accent-primary);
-      color: white;
-      transform: scale(1.1);
-    }
-
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .modal-overlay.active {
-      display: flex;
-    }
-
-    .modal-content {
-      background: var(--bg-secondary);
-      padding: 32px 28px;
-      border-radius: 28px;
-      box-shadow: var(--shadow-lg);
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-      animation: scaleIn 0.3s ease;
-    }
-
-    .modal-content h3 {
-      font-size: 24px;
-      color: var(--text-primary);
-      margin-bottom: 20px;
-    }
-
-    .modal-content input {
-      width: 100%;
-      padding: 14px 18px;
-      border-radius: 60px;
-      border: 2px solid var(--border-color);
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      font-size: 16px;
-      margin: 16px 0 24px;
-      transition: var(--transition);
-    }
-
-    .modal-content input:focus {
-      outline: none;
-      border-color: var(--accent-primary);
-    }
-
-    .modal-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-    }
-
-    .modal-btn {
-      flex: 1;
-      padding: 14px 0;
-      border-radius: 60px;
-      font-weight: 700;
-      font-size: 16px;
-      cursor: pointer;
-      transition: var(--transition);
-      border: none;
-    }
-
-    .modal-btn.primary {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-    }
-
-    .modal-btn.primary:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .modal-btn:not(.primary) {
-      background: var(--bg-tertiary);
-      color: var(--text-primary);
-    }
-
-    .modal-btn:not(.primary):hover {
-      background: var(--accent-danger);
-      color: white;
-    }
-
-    .qrcode-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(8px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-
-    .qrcode-window {
-      background: var(--bg-secondary);
-      border-radius: 32px;
-      box-shadow: var(--shadow-lg);
-      padding: 32px 40px;
-      max-width: 360px;
-      width: 90%;
-      text-align: center;
-      position: relative;
-      border: 1px solid var(--border-color);
-      animation: scaleIn 0.3s ease;
-    }
-
-    .qrcode-window-close {
-      position: absolute;
-      top: 16px;
-      right: 20px;
-      background: none;
-      border: none;
-      font-size: 28px;
-      cursor: pointer;
-      color: var(--text-muted);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: var(--transition);
-    }
-
-    .qrcode-window-close:hover {
-      background: var(--bg-tertiary);
-      color: var(--accent-danger);
-      transform: rotate(90deg);
-    }
-
-    .qr-container canvas {
-      margin: 16px auto;
-      border-radius: 20px;
-      background: white;
-      padding: 12px;
-    }
-
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .device-name { font-weight: 700; margin-bottom: 8px; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center; }
+    .device-status { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); }
+    .status-dot.online { background: var(--accent-success); animation: pulse 2s infinite; }
+    .device-actions { margin-top: 12px; display: flex; gap: 8px; }
+    .device-action-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: var(--transition); }
+    .device-action-btn.disconnect { background: var(--accent-danger); color: white; }
+    .device-action-btn.alias { background: var(--accent-primary); color: white; }
+    .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-primary); }
+    .chat-header { padding: 20px 24px; background: var(--bg-secondary); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .chat-header h3 { font-size: 20px; color: var(--text-primary); font-weight: 700; }
+    .messages { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+    .message { animation: messageIn 0.3s ease; }
+    @keyframes messageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .message-content { max-width: 70%; padding: 16px 20px; border-radius: 20px; position: relative; box-shadow: var(--shadow-sm); }
+    .message.sent { display: flex; justify-content: flex-end; }
+    .message.sent .message-content { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border-bottom-right-radius: 6px; }
+    .message.received { display: flex; justify-content: flex-start; }
+    .message.received .message-content { background: var(--bg-secondary); color: var(--text-primary); border-bottom-left-radius: 6px; }
+    .message-time { font-size: 11px; margin-top: 6px; opacity: 0.7; }
+    .message-sender { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary); }
+    .file-message { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-tertiary); border-radius: 10px; margin-top: 8px; flex-wrap: wrap; }
+    .file-info { flex: 1; }
+    .file-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; word-break: break-all; }
+    .file-size { font-size: 12px; opacity: 0.7; }
+    .download-btn { padding: 8px 16px; background: var(--accent-primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: var(--transition); }
+    .download-btn:hover { transform: scale(1.02); }
+    .image-preview { max-width: 200px; max-height: 150px; border-radius: 8px; cursor: pointer; margin-top: 8px; transition: var(--transition); }
+    .image-preview:hover { opacity: 0.9; transform: scale(1.02); }
+    .progress-container { margin-top: 8px; }
+    .progress-bar { height: 8px; background: var(--border-color); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary)); transition: width 0.2s ease; }
+    .progress-text { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .image-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 2000; cursor: pointer; }
+    .image-modal.active { display: flex; }
+    .image-modal img { max-width: 90%; max-height: 90%; object-fit: contain; animation: scaleIn 0.2s ease; }
+    .chat-input-area { padding: 20px 24px; background: var(--bg-secondary); border-top: 1px solid var(--border-color); }
+    .input-container { display: flex; gap: 12px; align-items: flex-end; }
+    .send-to-all-option { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-secondary); }
+    #message-input { flex: 1; padding: 14px 20px; border: 2px solid var(--border-color); border-radius: 24px; font-size: 16px; resize: none; height: 52px; background: var(--bg-primary); color: var(--text-primary); }
+    #message-input:focus { outline: none; border-color: var(--accent-primary); }
+    .send-btn { padding: 14px 28px; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; border: none; border-radius: 24px; cursor: pointer; font-weight: 700; transition: var(--transition); }
+    .send-btn:hover { transform: scale(1.02); }
+    .icon-btn { width: 52px; height: 52px; border-radius: 50%; border: none; background: var(--bg-tertiary); color: var(--text-primary); cursor: pointer; font-size: 20px; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
+    .icon-btn:hover { background: var(--accent-primary); color: white; transform: scale(1.1); }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-overlay.active { display: flex; }
+    .modal-content { background: var(--bg-secondary); padding: 32px 28px; border-radius: 28px; box-shadow: var(--shadow-lg); max-width: 420px; width: 90%; text-align: center; animation: scaleIn 0.3s ease; }
+    .modal-content h3 { font-size: 24px; color: var(--text-primary); margin-bottom: 20px; }
+    .modal-content input { width: 100%; padding: 14px 18px; border-radius: 60px; border: 2px solid var(--border-color); background: var(--bg-primary); color: var(--text-primary); font-size: 16px; margin: 16px 0 24px; transition: var(--transition); }
+    .modal-content input:focus { outline: none; border-color: var(--accent-primary); }
+    .modal-buttons { display: flex; gap: 16px; justify-content: center; }
+    .modal-btn { flex: 1; padding: 14px 0; border-radius: 60px; font-weight: 700; font-size: 16px; cursor: pointer; transition: var(--transition); border: none; }
+    .modal-btn.primary { background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); color: white; }
+    .modal-btn.primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .modal-btn:not(.primary) { background: var(--bg-tertiary); color: var(--text-primary); }
+    .modal-btn:not(.primary):hover { background: var(--accent-danger); color: white; }
+    .qrcode-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 2000; }
+    .qrcode-window { background: var(--bg-secondary); border-radius: 32px; box-shadow: var(--shadow-lg); padding: 32px 40px; max-width: 360px; width: 90%; text-align: center; position: relative; border: 1px solid var(--border-color); animation: scaleIn 0.3s ease; }
+    .qrcode-window-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 28px; cursor: pointer; color: var(--text-muted); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition); }
+    .qrcode-window-close:hover { background: var(--bg-tertiary); color: var(--accent-danger); transform: rotate(90deg); }
+    .qr-container canvas { margin: 16px auto; border-radius: 20px; background: white; padding: 12px; }
     .sidebar-expand-btn {
       position: fixed;
       left: 20px;
@@ -830,87 +344,31 @@
       z-index: 90;
       transition: var(--transition);
     }
-
-    .sidebar-expand-btn:hover {
-      transform: scale(1.1);
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 80px 20px;
-      color: var(--text-muted);
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      padding: 16px 24px;
-      background: var(--bg-secondary);
-      border-radius: 12px;
-      box-shadow: var(--shadow-lg);
-      z-index: 3000;
-      animation: slideIn 0.3s;
-      font-weight: 600;
-      border-left: 4px solid var(--accent-primary);
-    }
-
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-      background: var(--bg-primary);
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-color);
-      border-radius: 4px;
-    }
-
+    .sidebar-expand-btn:hover { transform: scale(1.1); }
+    .empty-state { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+    .toast { position: fixed; bottom: 30px; right: 30px; padding: 16px 24px; background: var(--bg-secondary); border-radius: 12px; box-shadow: var(--shadow-lg); z-index: 3000; animation: slideIn 0.3s; font-weight: 600; border-left: 4px solid var(--accent-primary); }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-primary); }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
     @media (max-width: 768px), (orientation: landscape) {
-      .sidebar {
-        position: fixed;
-        left: -320px;
-        top: 70px;
-        height: calc(100vh - 70px);
-        z-index: 50;
-        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      .sidebar.open {
-        left: 0;
-      }
-      .sidebar-expand-btn {
-        display: flex;
-      }
-      .main-container {
-        flex-direction: column;
-      }
+      .sidebar { position: fixed; left: -320px; top: 70px; height: calc(100vh - 70px); z-index: 50; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+      .sidebar.open { left: 0; }
+      .sidebar-expand-btn { display: flex; }
+      .main-container { flex-direction: column; }
     }
   </style>
 </head>
 <body>
   <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <p style="color: var(--text-secondary);">正在加载 P2P 网络...</p>
-    </div>
+    <div class="loading-spinner"><div class="spinner"></div><p>正在加载 P2P 网络...</p></div>
   </div>
-
-  <div class="image-modal" id="imageModal" onclick="closeImageModal()">
-    <img id="enlargedImage" src="">
-  </div>
-
+  <div class="image-modal" id="imageModal" onclick="closeImageModal()"><img id="enlargedImage" src=""></div>
   <div id="main-screen">
     <div class="header">
       <div class="header-left">
         <button class="header-btn" onclick="toggleSidebar()">☰ 设备</button>
         <div class="logo">P2P实时通信</div>
-        <div class="user-info">
-          <div class="user-avatar" id="user-avatar"></div>
-          <div class="user-details">
-            <div class="user-name" id="display-nickname"></div>
-            <div class="user-role" id="display-role"></div>
-          </div>
-        </div>
+        <div class="user-info"><div class="user-avatar" id="user-avatar"></div><div class="user-details"><div class="user-name" id="display-nickname"></div><div class="user-role" id="display-role"></div></div></div>
       </div>
       <div class="header-right">
         <button class="header-btn" onclick="showContactModal()">💬 联系</button>
@@ -919,19 +377,13 @@
     </div>
     <div class="main-container">
       <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-          <h3>设备连接 <button class="sidebar-close-btn" onclick="closeSidebar()">✕</button></h3>
+        <div class="sidebar-header"><h3>设备连接 <button class="sidebar-close-btn" onclick="closeSidebar()">✕</button></h3>
           <button class="action-btn" onclick="generateConnectionCode()">🔗 生成连接码</button>
           <button class="action-btn secondary" onclick="connectWithCode()">🔐 输入连接码</button>
           <button class="action-btn" style="background: var(--accent-success);" onclick="openQRCodeWindow()">📱 二维码连接</button>
-          <div class="connection-code-display" id="connection-code-display" style="display: none;">
-            <div class="label">我的连接码</div>
-            <div class="code" id="my-connection-code" onclick="copyConnectionCode()"></div>
-          </div>
+          <div class="connection-code-display" id="connection-code-display" style="display: none;"><div class="label">我的连接码</div><div class="code" id="my-connection-code" onclick="copyConnectionCode()"></div></div>
         </div>
-        <div class="device-list" id="device-list">
-          <div class="empty-state"><div class="icon">🔌</div><h3>暂无连接设备</h3><p>生成或输入连接码开始连接</p></div>
-        </div>
+        <div class="device-list" id="device-list"><div class="empty-state"><div class="icon">🔌</div><h3>暂无连接设备</h3><p>生成或输入连接码开始连接</p></div></div>
       </div>
       <div class="chat-area">
         <div class="chat-header"><h3 id="current-chat-title">选择设备开始聊天</h3></div>
@@ -947,60 +399,19 @@
       </div>
     </div>
   </div>
-
   <button class="sidebar-expand-btn" id="expandSidebarBtn" onclick="openSidebar()">☰</button>
-
-  <div class="modal-overlay" id="code-modal">
-    <div class="modal-content">
-      <h3>输入连接码</h3>
-      <input type="text" id="connection-code-input" placeholder="请输入对方连接码">
-      <div class="modal-buttons">
-        <button class="modal-btn primary" onclick="connectWithCodeSubmit()">连接</button>
-        <button class="modal-btn" onclick="closeCodeModal()">取消</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="alias-modal">
-    <div class="modal-content">
-      <h3>设备备注</h3>
-      <input type="text" id="alias-input" placeholder="请输入设备备注名称">
-      <div class="modal-buttons">
-        <button class="modal-btn primary" onclick="saveAlias()">保存</button>
-        <button class="modal-btn" onclick="closeAliasModal()">取消</button>
-      </div>
-    </div>
-  </div>
-  <div class="modal-overlay" id="contact-modal">
-    <div class="modal-content">
-      <h3>联系开发者</h3>
-      <p>选择一种方式联系开发者</p>
-      <div style="text-align:left;margin-bottom:24px;">
-        <a href="javascript:void(0)" onclick="openWebEmail()" style="display:block;padding:12px;background:var(--bg-primary);border-radius:10px;margin-bottom:12px;text-decoration:none;color:var(--text-primary);">📧 网页版QQ邮箱</a>
-        <a href="mailto:3530388417@qq.com" style="display:block;padding:12px;background:var(--bg-primary);border-radius:10px;text-decoration:none;color:var(--text-primary);">💻 系统邮箱</a>
-      </div>
-      <a href="https://qm.qq.com/q/t0wc7dGAGA" target="_blank" style="display:block;padding:12px;background:var(--bg-primary);border-radius:10px;margin-bottom:24px;text-decoration:none;color:var(--text-primary);">👥 加入QQ群</a>
-      <button class="modal-btn primary" onclick="closeContactModal()">关闭</button>
-    </div>
-  </div>
-
-  <div class="qrcode-modal-overlay" id="qrcodeWindowOverlay" onclick="if(event.target===this) closeQRCodeWindow()">
-    <div class="qrcode-window">
-      <button class="qrcode-window-close" onclick="closeQRCodeWindow()">✕</button>
-      <h3>📱 扫码连接</h3>
-      <div class="qr-container"><canvas id="qrCodeCanvas" width="200" height="200"></canvas></div>
-      <div class="qr-caption">请使用微信/浏览器扫码连接</div>
-    </div>
-  </div>
+  <div class="modal-overlay" id="code-modal"><div class="modal-content"><h3>输入连接码</h3><input type="text" id="connection-code-input" placeholder="请输入对方连接码"><div class="modal-buttons"><button class="modal-btn primary" onclick="connectWithCodeSubmit()">连接</button><button class="modal-btn" onclick="closeCodeModal()">取消</button></div></div></div>
+  <div class="modal-overlay" id="alias-modal"><div class="modal-content"><h3>设备备注</h3><input type="text" id="alias-input" placeholder="请输入设备备注名称"><div class="modal-buttons"><button class="modal-btn primary" onclick="saveAlias()">保存</button><button class="modal-btn" onclick="closeAliasModal()">取消</button></div></div></div>
+  <div class="modal-overlay" id="contact-modal"><div class="modal-content"><h3>联系开发者</h3><p>选择一种方式联系开发者</p><div style="text-align:left;margin-bottom:24px;"><a href="javascript:void(0)" onclick="openWebEmail()" style="display:block;padding:12px;background:var(--bg-primary);border-radius:10px;margin-bottom:12px;text-decoration:none;color:var(--text-primary);">📧 网页版QQ邮箱</a><a href="mailto:3530388417@qq.com" style="display:block;padding:12px;background:var(--bg-primary);border-radius:10px;text-decoration:none;color:var(--text-primary);">💻 系统邮箱</a></div><a href="https://qm.qq.com/q/t0wc7dGAGA" target="_blank" style="display:block;padding:12px;background:var(--bg-primary);border-radius:10px;margin-bottom:24px;text-decoration:none;color:var(--text-primary);">👥 加入QQ群</a><button class="modal-btn primary" onclick="closeContactModal()">关闭</button></div></div>
+  <div class="qrcode-modal-overlay" id="qrcodeWindowOverlay" onclick="if(event.target===this) closeQRCodeWindow()"><div class="qrcode-window"><button class="qrcode-window-close" onclick="closeQRCodeWindow()">✕</button><h3>📱 扫码连接</h3><div class="qr-container"><canvas id="qrCodeCanvas" width="200" height="200"></canvas></div><div class="qr-caption">请使用微信/浏览器扫码连接</div></div></div>
 
   <script>
     // ========== 全局变量 ==========
-    let myDevice = 'pc', myNickname = '', myConnectionCode = '';
-    let peer = null, connections = {}, currentChatPeerId = null, messages = {}, deviceAliases = {}, unreadMessages = {};
-    let currentAliasPeerId = null;
+    let myDevice = 'phone', myRole = 'sender', myNickname = '', myConnectionCode = '';
+    let peer = null, connections = {}, currentChatPeerId = null, messages = {}, deviceAliases = {}, deviceConnectionCounts = {}, currentAliasPeerId = null, unreadMessages = {}, fileReceivers = {};
     const deviceLabels = { phone:'手机', tablet:'平板', pc:'电脑' };
-    
-    // 文件接收缓冲区
-    let fileReceivers = {};
+    // 大文件优化：分块大小提升到 256KB (比16KB快16倍)
+    const CHUNK_SIZE = 256 * 1024;
 
     function detectDeviceType() {
       const ua = navigator.userAgent;
@@ -1019,10 +430,7 @@
     function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); }
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
     function closeImageModal() { document.getElementById('imageModal').classList.remove('active'); }
-    function showImageModal(url) { 
-      document.getElementById('enlargedImage').src = url;
-      document.getElementById('imageModal').classList.add('active');
-    }
+    function showImageModal(url) { document.getElementById('enlargedImage').src = url; document.getElementById('imageModal').classList.add('active'); }
 
     function openQRCodeWindow() {
       const overlay = document.getElementById('qrcodeWindowOverlay');
@@ -1044,6 +452,8 @@
       document.getElementById('user-avatar').textContent = myNickname.charAt(0).toUpperCase();
       const savedAliases = localStorage.getItem('deviceAliases');
       if (savedAliases) deviceAliases = JSON.parse(savedAliases);
+      const savedCounts = localStorage.getItem('deviceConnectionCounts');
+      if (savedCounts) deviceConnectionCounts = JSON.parse(savedCounts);
       initPeerJS();
     }
 
@@ -1073,6 +483,8 @@
     function handleConnection(conn) {
       conn.on('open', () => {
         const peerId = conn.peer;
+        deviceConnectionCounts[peerId] = (deviceConnectionCounts[peerId] || 0) + 1;
+        localStorage.setItem('deviceConnectionCounts', JSON.stringify(deviceConnectionCounts));
         conn.send({ type: 'request-nickname' });
         if (Object.keys(connections).length === 0) currentChatPeerId = peerId;
         connections[peerId] = { conn, nickname: deviceAliases[peerId] || `设备 ${peerId.substring(0, 6)}`, online: true };
@@ -1082,10 +494,14 @@
         conn.on('data', (data) => handleIncomingData(peerId, data));
         conn.on('close', () => {
           if (connections[peerId]) {
+            connections[peerId].online = false;
             delete messages[peerId];
             delete unreadMessages[peerId];
-            if (currentChatPeerId === peerId) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备开始聊天'; renderMessages(peerId); }
-            delete connections[peerId];
+            if (currentChatPeerId === peerId) {
+              currentChatPeerId = null;
+              document.getElementById('current-chat-title').textContent = '选择设备开始聊天';
+              displayMessages(peerId);
+            }
             updateDeviceList();
           }
         });
@@ -1093,49 +509,74 @@
     }
 
     function dataURLtoBlob(dataURL) {
-      const arr = dataURL.split(','), mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]), u8arr = new Uint8Array(bstr.length);
+      const arr = dataURL.split(',');
+      const mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]);
+      const u8arr = new Uint8Array(bstr.length);
       for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
       return new Blob([u8arr], { type: mime });
     }
 
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+      return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+    }
+
     function handleIncomingData(peerId, data) {
       if (!messages[peerId]) messages[peerId] = [];
+      if (navigator.vibrate && myDevice === 'phone') navigator.vibrate(200);
       
       if (data.type === 'message') {
         unreadMessages[peerId] = (unreadMessages[peerId] || 0) + 1;
         messages[peerId].push({ content: data.content, sender: data.sender, sent: false, time: new Date().toLocaleTimeString() });
-        if (currentChatPeerId === peerId) renderMessages(peerId);
-        if (myDevice === 'phone' && navigator.vibrate) navigator.vibrate(100);
+        if (currentChatPeerId === peerId) displayMessages(peerId);
       } 
       else if (data.type === 'file-start') {
-        // 创建进度消息
         const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(data.fileName);
-        const progressMsg = { 
-          type: 'progress', 
-          fileId: data.fileId,
-          fileName: data.fileName,
-          fileSize: data.fileSize,
-          sender: data.sender,
-          progress: 0,
+        fileReceivers[data.fileId] = { 
+          fileName: data.fileName, 
+          fileSize: data.fileSize, 
+          totalChunks: data.totalChunks, 
+          chunks: [], 
+          sender: data.sender, 
+          startTime: Date.now(),
           isImage: isImage,
-          time: new Date().toLocaleTimeString(),
-          chunks: [],
-          totalChunks: data.totalChunks
+          receivedBytes: 0
         };
-        messages[peerId].push(progressMsg);
-        fileReceivers[data.fileId] = progressMsg;
-        if (currentChatPeerId === peerId) renderMessages(peerId);
+        unreadMessages[peerId] = (unreadMessages[peerId] || 0) + 1;
+        messages[peerId].push({ 
+          type: 'progress', 
+          id: data.fileId, 
+          content: `📁 接收中: ${data.fileName} (0%)`, 
+          sent: false, 
+          time: new Date().toLocaleTimeString(), 
+          progress: 0,
+          fileName: data.fileName,
+          fileId: data.fileId,
+          fileSize: data.fileSize
+        });
+        if (currentChatPeerId === peerId) displayMessages(peerId);
       } 
       else if (data.type === 'file-chunk') {
         const r = fileReceivers[data.fileId];
         if (r) {
           r.chunks[data.chunkIndex] = data.chunkData;
-          const received = r.chunks.filter(c => c !== undefined).length;
-          const prog = Math.floor((received / r.totalChunks) * 100);
-          r.progress = prog;
-          // 只更新进度条DOM，不重新渲染整个聊天区域
-          updateProgressBar(peerId, data.fileId, prog);
+          r.receivedBytes += data.chunkData.length;
+          const receivedCount = r.chunks.filter(c => c !== undefined).length;
+          const prog = Math.floor((receivedCount / r.totalChunks) * 100);
+          const msg = messages[peerId].find(m => m.id === data.fileId);
+          if (msg) {
+            msg.content = `📁 接收中: ${r.fileName} (${prog}%) - ${formatFileSize(r.receivedBytes)}/${formatFileSize(r.fileSize)}`;
+            msg.progress = prog;
+            if (currentChatPeerId === peerId) {
+              const progressFill = document.getElementById(`progress-fill-${data.fileId}`);
+              if (progressFill) progressFill.style.width = `${prog}%`;
+              const progressText = document.getElementById(`progress-text-${data.fileId}`);
+              if (progressText) progressText.textContent = `${prog}% (${formatFileSize(r.receivedBytes)})`;
+            }
+          }
         }
       } 
       else if (data.type === 'file-end') {
@@ -1144,92 +585,39 @@
           const fullData = r.chunks.join('');
           const blob = dataURLtoBlob(fullData);
           const url = URL.createObjectURL(blob);
-          // 将进度消息替换为完成消息
-          const index = messages[peerId].findIndex(m => m.fileId === data.fileId);
+          const index = messages[peerId].findIndex(m => m.id === data.fileId);
           if (index !== -1) {
-            messages[peerId][index] = {
+            messages[peerId][index] = { 
               type: 'file',
               fileURL: url,
-              fileName: r.fileName,
+              fileName: r.fileName, 
               fileSize: r.fileSize,
-              sender: r.sender,
-              sent: false,
-              time: r.time,
+              sender: r.sender, 
+              sent: false, 
+              time: new Date().toLocaleTimeString(),
               isImage: r.isImage
             };
           }
           delete fileReceivers[data.fileId];
-          if (currentChatPeerId === peerId) renderMessages(peerId);
-          showToast(`文件 ${r.fileName} 接收完成`);
+          // 关键修复：接收完成后立即刷新当前聊天界面，显示下载按钮
+          if (currentChatPeerId === peerId) displayMessages(peerId);
+          showToast(`✅ 文件 ${r.fileName} 接收完成，点击下载按钮保存`);
         }
-      }
+      } 
       else if (data.type === 'request-nickname') {
         connections[peerId]?.conn.send({ type: 'nickname', nickname: myNickname });
       } 
       else if (data.type === 'nickname') {
-        if (connections[peerId]) { 
-          connections[peerId].nickname = data.nickname; 
-          if (currentChatPeerId === peerId) document.getElementById('current-chat-title').textContent = data.nickname; 
-          updateDeviceList(); 
+        if (connections[peerId]) {
+          connections[peerId].nickname = data.nickname;
+          if (currentChatPeerId === peerId) document.getElementById('current-chat-title').textContent = data.nickname;
+          updateDeviceList();
         }
       }
       updateDeviceList();
     }
 
-    // 单独更新进度条，避免整个聊天区域闪烁
-    function updateProgressBar(peerId, fileId, progress) {
-      if (currentChatPeerId !== peerId) return;
-      const progressElement = document.getElementById(`progress-${fileId}`);
-      if (progressElement) {
-        const fill = progressElement.querySelector('.progress-bar-fill');
-        const text = progressElement.querySelector('.progress-text');
-        if (fill) fill.style.width = `${progress}%`;
-        if (text) text.textContent = `${progress}%`;
-      }
-    }
-
-    function renderMessages(peerId) {
-      const container = document.getElementById('messages');
-      const msgs = messages[peerId] || [];
-      if (msgs.length === 0) {
-        container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>发送第一条消息</p></div>`;
-        return;
-      }
-      
-      let html = '';
-      for (let i = 0; i < msgs.length; i++) {
-        const m = msgs[i];
-        if (m.type === 'file') {
-          if (m.isImage) {
-            html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
-          } else {
-            html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><div class="file-message"><div class="file-info"><div class="file-name">📄 ${escapeHtml(m.fileName)}</div><div class="file-size">${(m.fileSize/1024).toFixed(1)} KB</div></div><button class="download-btn" onclick="downloadFile('${m.fileURL}', '${escapeHtml(m.fileName)}')">下载</button></div><div class="message-time">${m.time}</div></div></div>`;
-          }
-        } else if (m.type === 'progress') {
-          html += `<div class="message received"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><div>📁 接收中: ${escapeHtml(m.fileName)}</div><div class="progress-container" id="progress-${m.fileId}"><div class="progress-bar"><div class="progress-bar-fill" style="width:${m.progress}%"></div></div><div class="progress-text">${m.progress}%</div></div><div class="message-time">${m.time}</div></div></div>`;
-        } else {
-          html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender || (m.sent ? myNickname : connections[peerId]?.nickname))}</div>${escapeHtml(m.content)}<div class="message-time">${m.time}</div></div></div>`;
-        }
-      }
-      container.innerHTML = html;
-      container.scrollTop = container.scrollHeight;
-    }
-    
-    function downloadFile(url, filename) {
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-    
-    function escapeHtml(str) { 
-      if (!str) return '';
-      return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); 
-    }
-
-    function generateConnectionCode() { if (peer) { showToast(`连接码: ${myConnectionCode}`); } }
+    function generateConnectionCode() { if (peer) { document.getElementById('my-connection-code').textContent = myConnectionCode; document.getElementById('connection-code-display').style.display = 'block'; showToast('连接码已生成'); } }
     function checkUrlParams() { const p = new URLSearchParams(location.search).get('connect'); if (p) setTimeout(() => { if (peer && !connections[p]) { const conn = peer.connect(p, { reliable: true }); handleConnection(conn); } }, 1000); }
     function copyConnectionCode() { navigator.clipboard.writeText(myConnectionCode).then(() => showToast('已复制')); }
     function connectWithCode() { document.getElementById('code-modal').classList.add('active'); }
@@ -1246,19 +634,49 @@
       const list = document.getElementById('device-list');
       const devs = Object.values(connections);
       if (devs.length === 0) list.innerHTML = `<div class="empty-state"><div class="icon">🔌</div><h3>暂无连接设备</h3><p>生成或输入连接码开始连接</p></div>`;
-      else list.innerHTML = devs.map(d => `<div class="device-item ${currentChatPeerId === d.conn.peer ? 'active' : ''} ${unreadMessages[d.conn.peer] && currentChatPeerId !== d.conn.peer ? 'has-unread' : ''}" onclick="selectDevice('${d.conn.peer}')"><div class="device-name"><span>${escapeHtml(d.nickname)}</span></div><div class="device-status"><span class="status-dot online"></span>已连接</div><div class="device-actions"><button class="device-action-btn alias" onclick="event.stopPropagation();showAliasModal('${d.conn.peer}')">备注</button><button class="device-action-btn disconnect" onclick="event.stopPropagation();disconnectDevice('${d.conn.peer}')">断开</button></div></div>`).join('');
+      else list.innerHTML = devs.map(d => `<div class="device-item ${currentChatPeerId === d.conn.peer ? 'active' : ''} ${unreadMessages[d.conn.peer] && currentChatPeerId !== d.conn.peer ? 'has-unread' : ''}" onclick="selectDevice('${d.conn.peer}')"><div class="device-name"><span>${escapeHtml(d.nickname)}</span></div><div class="device-status"><span class="status-dot ${d.online ? 'online' : ''}"></span>${d.online ? '已连接' : '未连接'}</div><div class="device-actions"><button class="device-action-btn alias" onclick="event.stopPropagation();showAliasModal('${d.conn.peer}')">备注</button><button class="device-action-btn disconnect" onclick="event.stopPropagation();disconnectDevice('${d.conn.peer}')">断开</button></div></div>`).join('');
     }
     
-    function selectDevice(pid) { 
-      currentChatPeerId = pid; 
-      unreadMessages[pid] = 0; 
-      document.getElementById('current-chat-title').textContent = connections[pid]?.nickname || '选择设备'; 
-      updateDeviceList(); 
-      renderMessages(pid); 
-      closeSidebar(); 
+    function selectDevice(pid) { currentChatPeerId = pid; unreadMessages[pid] = 0; document.getElementById('current-chat-title').textContent = connections[pid]?.nickname || '选择设备'; updateDeviceList(); displayMessages(pid); closeSidebar(); }
+    
+    function displayMessages(peerId) {
+      const container = document.getElementById('messages');
+      const msgs = messages[peerId] || [];
+      if (msgs.length === 0) container.innerHTML = `<div class="empty-state"><div class="icon">💬</div><h3>开始聊天</h3><p>发送第一条消息</p></div>`;
+      else {
+        let html = '';
+        for (let i = 0; i < msgs.length; i++) {
+          const m = msgs[i];
+          if (m.type === 'file') {
+            if (m.isImage) {
+              html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><img src="${m.fileURL}" class="image-preview" onclick="showImageModal('${m.fileURL}')" alt="图片"><div class="message-time">${m.time}</div></div></div>`;
+            } else {
+              html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><div class="file-message"><div class="file-info"><div class="file-name">📄 ${escapeHtml(m.fileName)}</div><div class="file-size">${formatFileSize(m.fileSize)}</div></div><button class="download-btn" onclick="downloadFile('${m.fileURL}', '${escapeHtml(m.fileName)}')">⬇️ 下载</button></div><div class="message-time">${m.time}</div></div></div>`;
+            }
+          } else if (m.type === 'progress') {
+            html += `<div class="message received"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender)}</div><div>📁 接收中: ${escapeHtml(m.fileName)}</div><div class="progress-container"><div class="progress-bar"><div class="progress-bar-fill" id="progress-fill-${m.id}" style="width:${m.progress}%"></div></div><div class="progress-text" id="progress-text-${m.id}">${m.progress}%</div></div><div class="message-time">${m.time}</div></div></div>`;
+          } else {
+            html += `<div class="message ${m.sent ? 'sent' : 'received'}"><div class="message-content"><div class="message-sender">${escapeHtml(m.sender || (m.sent ? myNickname : connections[peerId]?.nickname))}</div>${escapeHtml(m.content)}<div class="message-time">${m.time}</div></div></div>`;
+          }
+        }
+        container.innerHTML = html;
+      }
+      container.scrollTop = container.scrollHeight;
     }
     
-    function disconnectDevice(pid) { if (confirm('断开连接？')) { connections[pid]?.conn.close(); delete connections[pid]; if (currentChatPeerId === pid) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备'; renderMessages(pid); } updateDeviceList(); } }
+    function downloadFile(url, filename) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast(`开始下载: ${filename}`);
+    }
+    
+    function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, function(m){ if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    
+    function disconnectDevice(pid) { if (confirm('断开连接？')) { connections[pid]?.conn.close(); delete connections[pid]; if (currentChatPeerId === pid) { currentChatPeerId = null; document.getElementById('current-chat-title').textContent = '选择设备'; displayMessages(pid); } updateDeviceList(); } }
     
     function sendMessage() {
       const msg = document.getElementById('message-input').value.trim();
@@ -1274,7 +692,7 @@
           messages[pid].push({ content: msg, sender: myNickname, sent: true, time: new Date().toLocaleTimeString() });
         }
       });
-      renderMessages(currentChatPeerId || targets[0]);
+      displayMessages(currentChatPeerId || targets[0]);
       document.getElementById('message-input').value = '';
     }
     
@@ -1282,14 +700,11 @@
       const conn = connections[peerId]?.conn;
       if (!conn || !conn.open) return false;
       const fileId = Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-      const chunkSize = 16384;
-      let offset = 0;
-      const totalChunks = Math.ceil(file.size / chunkSize);
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
       const isImage = /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(file.name);
       
       conn.send({ type: 'file-start', fileId, fileName: file.name, fileSize: file.size, totalChunks, sender: myNickname });
       
-      // 发送方立即显示自己的文件消息（带下载按钮）
       const localUrl = URL.createObjectURL(file);
       if (!messages[peerId]) messages[peerId] = [];
       messages[peerId].push({ 
@@ -1302,21 +717,27 @@
         time: new Date().toLocaleTimeString(), 
         isImage: isImage 
       });
-      if (currentChatPeerId === peerId) renderMessages(peerId);
+      if (currentChatPeerId === peerId) displayMessages(peerId);
+      
+      let offset = 0;
+      let chunkIndex = 0;
       
       function sendNextChunk() {
-        const slice = file.slice(offset, offset + chunkSize);
+        const slice = file.slice(offset, offset + CHUNK_SIZE);
         const reader = new FileReader();
         reader.onload = (e) => {
-          conn.send({ type: 'file-chunk', fileId, chunkIndex: offset / chunkSize, chunkData: e.target.result });
-          offset += chunkSize;
+          conn.send({ type: 'file-chunk', fileId, chunkIndex: chunkIndex, chunkData: e.target.result });
+          offset += CHUNK_SIZE;
+          chunkIndex++;
           if (offset < file.size) {
-            sendNextChunk();
+            // 使用 setTimeout 避免阻塞UI，同时加快传输
+            setTimeout(sendNextChunk, 0);
           } else {
             conn.send({ type: 'file-end', fileId });
-            showToast(`文件 ${file.name} 发送完成`);
+            showToast(`✅ 文件 ${file.name} 发送完成 (${formatFileSize(file.size)})`);
           }
         };
+        reader.onerror = () => { showToast(`文件发送失败`); };
         reader.readAsDataURL(slice);
       }
       sendNextChunk();
@@ -1333,7 +754,7 @@
           let targets = sendAll ? Object.keys(connections) : (currentChatPeerId ? [currentChatPeerId] : []);
           if (targets.length === 0) { showToast('请选择设备'); return; }
           targets.forEach(pid => { sendFileToPeer(pid, file); });
-          showToast(`发送文件: ${file.name}`);
+          showToast(`开始发送: ${file.name} (${formatFileSize(file.size)})`);
         }
       };
       input.click();
